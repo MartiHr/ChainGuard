@@ -1,4 +1,4 @@
-import EvidenceCard from '../EvidenceCard.tsx';
+import EvidenceCard from '../evidence-card/EvidenceCard.tsx';
 import { Header } from './header/index.tsx';
 import type { EvidenceBoardProps } from './models.ts';
 import { StatsBar } from './start-bar/index.tsx';

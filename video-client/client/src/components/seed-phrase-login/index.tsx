@@ -1,20 +1,18 @@
-import { useState, useRef } from "react";
-import type { WalletState } from "../types.ts";
-import { walletFromMnemonic } from "../blockchain.ts";
-import ThemeToggle from "./ThemeToggle.tsx";
+import { useState, useRef } from 'react';
+import { walletFromMnemonic } from '../../blockchain.ts';
+import ThemeToggle from '../theme-toggle/index.tsx';
 
-import chainGuardLogo from "../assets/ChainGuard.png";
+import chainGuardLogo from '../assets/ChainGuard.png';
+import type { SeedPhraseLoginProps } from './models.ts';
 
-interface Props {
-  onLogin: (wallet: WalletState) => void;
-  dark: boolean;
-  onToggleTheme: () => void;
-}
-
-export default function SeedPhraseLogin({ onLogin, dark, onToggleTheme }: Props) {
+export default function SeedPhraseLogin({
+  onLogin,
+  dark,
+  onToggleTheme,
+}: SeedPhraseLoginProps) {
   const [words, setWords] = useState<string[]>([]);
-  const [currentWord, setCurrentWord] = useState("");
-  const [error, setError] = useState("");
+  const [currentWord, setCurrentWord] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -25,15 +23,15 @@ export default function SeedPhraseLogin({ onLogin, dark, onToggleTheme }: Props)
       const combined = [...prev, ...parts];
       return combined.slice(0, 12);
     });
-    setCurrentWord("");
+    setCurrentWord('');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === " ") {
+    if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       addWords(currentWord);
     }
-    if (e.key === "Backspace" && currentWord === "" && words.length > 0) {
+    if (e.key === 'Backspace' && currentWord === '' && words.length > 0) {
       e.preventDefault();
       setWords((prev) => prev.slice(0, -1));
     }
@@ -42,7 +40,7 @@ export default function SeedPhraseLogin({ onLogin, dark, onToggleTheme }: Props)
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     // If pasted text contains spaces, split into words immediately
-    if (val.includes(" ")) {
+    if (val.includes(' ')) {
       addWords(val);
     } else {
       setCurrentWord(val);
@@ -56,10 +54,10 @@ export default function SeedPhraseLogin({ onLogin, dark, onToggleTheme }: Props)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     // Include any pending word the user hasn't confirmed yet
-    if (currentWord.trim() !== "") {
+    if (currentWord.trim() !== '') {
       addWords(currentWord);
       return; // state will update; user clicks again with all words confirmed
     }
@@ -73,10 +71,10 @@ export default function SeedPhraseLogin({ onLogin, dark, onToggleTheme }: Props)
 
     try {
       setLoading(true);
-      const wallet = walletFromMnemonic(finalWords.join(" "));
+      const wallet = walletFromMnemonic(finalWords.join(' '));
       onLogin(wallet);
     } catch {
-      setError("Invalid seed phrase. Please check your words and try again.");
+      setError('Invalid seed phrase. Please check your words and try again.');
     } finally {
       setLoading(false);
     }
@@ -108,7 +106,7 @@ export default function SeedPhraseLogin({ onLogin, dark, onToggleTheme }: Props)
             className="word-input"
             placeholder={
               words.length >= 12
-                ? "All 12 words entered ✓"
+                ? 'All 12 words entered ✓'
                 : `Word ${words.length + 1} of 12`
             }
             value={currentWord}
@@ -121,17 +119,13 @@ export default function SeedPhraseLogin({ onLogin, dark, onToggleTheme }: Props)
 
           {error && <p className="error-message">{error}</p>}
 
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={loading}
-          >
-            {loading ? "Deriving wallet…" : "Unlock Evidence Vault"}
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'Deriving wallet…' : 'Unlock Evidence Vault'}
           </button>
         </form>
 
         <p className="login-note">
-          Your private key is derived locally and <strong>never</strong>{" "}
+          Your private key is derived locally and <strong>never</strong>{' '}
           transmitted or stored.
         </p>
       </div>

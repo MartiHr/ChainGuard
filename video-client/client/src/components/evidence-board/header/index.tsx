@@ -1,4 +1,4 @@
-import ThemeToggle from '../../ThemeToggle';
+import ThemeToggle from '../../theme-toggle';
 import type { HeaderProps } from './models';
 
 export function Header({ wallet, onLogout, dark, onToggleTheme }: HeaderProps) {
