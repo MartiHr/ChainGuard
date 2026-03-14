@@ -26,9 +26,40 @@ interface Session {
   gpsCoordinates: string;
   chunkCount: number;
   dir: string;
+  timeoutId?: NodeJS.Timeout;
 }
 
 const sessions = new Map<string, Session>();
+
+async function finalizeSession(sessionId: string) {
+  const session = sessions.get(sessionId);
+  if (!session) return; 
+
+  console.log(`[Auto-Finalize] Session ${sessionId} processing...`);
+
+  try {
+    const assembledPath = path.join(session.dir, "final.mp4");
+    await assembleVideo(session.dir, assembledPath);
+
+    let fileToUpload: Buffer;
+    if (!session.isPublic) {
+      fileToUpload = await encryptVideo(assembledPath, session.publicKey);
+    } else {
+      fileToUpload = await fs.readFile(assembledPath);
+    }
+
+    const fileName = session.isPublic ? "evidence.mp4" : "evidence.enc";
+    const cid = await uploadToIPFS(fileToUpload, fileName);
+
+    await submitEvidence(cid, session.gpsCoordinates, session.isPublic, session.walletAddress);
+    console.log(`[Success] Evidence saved for session ${sessionId}`);
+  } catch (error) {
+    console.error(`[Error] Finalization failed for ${sessionId}:`, error);
+  } finally {
+    await fs.rm(session.dir, { recursive: true, force: true }).catch(() => {});
+    sessions.delete(sessionId);
+  }
+}
 
 // --- Start session ---
 app.post("/sessions", async (req, res) => {
@@ -38,6 +69,11 @@ app.post("/sessions", async (req, res) => {
     const dir = path.join(__dirname, "../uploads", sessionId);
     await fs.mkdir(dir, { recursive: true });
 
+    const timeoutId = setTimeout(() => {
+      console.log(`Session ${sessionId} timed out! Auto-finalizing...`);
+      finalizeSession(sessionId);
+    }, 20000);
+
     sessions.set(sessionId, {
       walletAddress,
       publicKey,
@@ -45,6 +81,7 @@ app.post("/sessions", async (req, res) => {
       gpsCoordinates,
       chunkCount: 0,
       dir,
+      timeoutId
     });
 
     res.json({ sessionId });
@@ -69,6 +106,8 @@ app.post(
         return;
       }
 
+      if (session.timeoutId) clearTimeout(session.timeoutId);
+
       const chunkIndex = session.chunkCount;
       const destPath = path.join(
         session.dir,
@@ -81,6 +120,12 @@ app.post(
       }
 
       session.chunkCount++;
+
+      session.timeoutId = setTimeout(() => {
+      console.log(`Session ${sessionId} timed out after chunk ${chunkIndex}! Auto-finalizing...`);
+      finalizeSession(sessionId);
+      }, 20000);
+
       console.log(`Session ${sessionId}: received chunk ${chunkIndex}`);
       res.json({ received: true, chunkIndex });
     } catch (error) {
@@ -100,6 +145,11 @@ app.post("/sessions/:sessionId/end", async (req, res) => {
       return;
     }
 
+    if (session.timeoutId) clearTimeout(session.timeoutId);
+
+    finalizeSession(sessionId);
+
+    
     console.log(
       `Session ${sessionId}: finalizing (${session.chunkCount} chunks)...`,
     );
@@ -166,7 +216,7 @@ app.get("/evidence/:walletAddress", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+// const PORT = process.env.PORT || 3000;
 
 // Initialize blockchain connection
 initContract()
@@ -177,6 +227,16 @@ initContract()
     console.error("Failed to connect to blockchain:", error);
   });
 
-app.listen(PORT, () => {
-  console.log(`ChainGuard backend running on :${PORT}`);
+// app.listen(PORT,  () => {
+//   console.log(`ChainGuard backend running on :${PORT}`);
+// });
+
+// Force PORT to be a number
+
+const PORT: number = Number(process.env.PORT) || 3000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`ChainGuard backend running on port: ${PORT}`);
+  // Replace <YOUR_IPV4_ADDRESS> with the IP from ipconfig (e.g., 192.168.1.15)
+  console.log(`Mobile app should connect to: http://YOUR_IP_HERE:${PORT}`);
 });
