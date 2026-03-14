@@ -1,36 +1,70 @@
 export const CONTRACT_ABI = [
   {
-    inputs: [{ internalType: "address", name: "owner", type: "address" }],
-    name: "getRecordsByOwner",
+    type: "function",
+    name: "storeEvidence",
+    inputs: [
+      { name: "_cid", type: "string" },
+      { name: "_isPublic", type: "bool" },
+      { name: "user", type: "address" },
+      { name: "_latitude", type: "string" },
+      { name: "_longitude", type: "string" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "getEvidencesByUser",
+    inputs: [{ name: "user", type: "address" }],
     outputs: [
       {
-        components: [
-          { internalType: "uint256", name: "id", type: "uint256" },
-          { internalType: "string", name: "cid", type: "string" },
-          { internalType: "uint256", name: "timestamp", type: "uint256" },
-          { internalType: "string", name: "latitude", type: "string" },
-          { internalType: "string", name: "longitude", type: "string" },
-          { internalType: "address", name: "owner", type: "address" },
-        ],
-        internalType: "struct ChainGuard.Record[]",
-        name: "",
         type: "tuple[]",
+        components: [
+          { name: "cid", type: "string" },
+          { name: "timestamp", type: "uint256" },
+          { name: "owner", type: "address" },
+          { name: "isPublic", type: "bool" },
+          { name: "latitude", type: "string" },
+          { name: "longitude", type: "string" },
+        ],
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
-    name: "getRecordCount",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
     type: "function",
+    name: "getPublicFeed",
+    inputs: [],
+    outputs: [
+      {
+        type: "tuple[]",
+        components: [
+          { name: "cid", type: "string" },
+          { name: "timestamp", type: "uint256" },
+          { name: "owner", type: "address" },
+          { name: "isPublic", type: "bool" },
+          { name: "latitude", type: "string" },
+          { name: "longitude", type: "string" },
+        ],
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "event",
+    name: "EvidenceStored",
+    inputs: [
+      { name: "cid", type: "string", indexed: false },
+      { name: "owner", type: "address", indexed: true },
+      { name: "isPublic", type: "bool", indexed: false },
+      { name: "latitude", type: "string", indexed: false },
+      { name: "longitude", type: "string", indexed: false },
+    ],
   },
 ] as const;
 
-// Dummy config
-export const CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000000";
-export const RPC_URL = "https://rpc-amoy.polygon.technology/";
-export const IPFS_GATEWAY = "https://gateway.pinata.cloud/ipfs";
-export const EXPLORER_URL = "https://sepolia.etherscan.io/tx";
+// Configuration - update with your contract deployment details
+export const CONTRACT_ADDRESS = process.env.VITE_CONTRACT_ADDRESS || "0x0000000000000000000000000000000000000000";
+export const RPC_URL = process.env.VITE_RPC_URL || "http://127.0.0.1:8545";
+export const IPFS_GATEWAY = process.env.VITE_IPFS_GATEWAY || "https://gateway.pinata.cloud/ipfs";
+export const EXPLORER_URL = process.env.VITE_EXPLORER_URL || "http://localhost:8545";

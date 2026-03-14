@@ -23,21 +23,21 @@ export async function fetchRecords(
   );
 
   const raw: Array<{
-    id: bigint;
     cid: string;
     timestamp: bigint;
+    owner: string;
+    isPublic: boolean;
     latitude: string;
     longitude: string;
-    owner: string;
-  }> = await contract.getRecordsByOwner(walletAddress);
+  }> = await contract.getEvidencesByUser(walletAddress);
 
-  return raw.map((r) => ({
-    id: Number(r.id),
+  return raw.map((r, index) => ({
+    id: index,
     cid: r.cid,
     timestamp: Number(r.timestamp),
     latitude: r.latitude,
     longitude: r.longitude,
-    txHash: "", // filled below if available
+    txHash: "", // not available from contract query
     owner: r.owner,
   }));
 }

@@ -1,3 +1,5 @@
+// @ts-ignore
+// @ts-ignore
 import { ethers } from "ethers";
 import ChainGuardABI from "../abi/ChainGuard.json";
 
@@ -8,7 +10,8 @@ const MOCK_MODE =
 const mockEvidences: Array<{
   user: string;
   videoHash: string;
-  gpsCoordinates: string;
+  latitude: string;
+  longitude: string;
   timestamp: number;
   isPublic: boolean;
 }> = [];
@@ -25,6 +28,18 @@ function getContract() {
 }
 
 const contract = getContract();
+
+/**
+ * Parse GPS coordinates string into latitude and longitude
+ * Expected format: "latitude,longitude" or empty string
+ */
+function parseGpsCoordinates(gpsCoordinates: string): { latitude: string; longitude: string } {
+  if (!gpsCoordinates || !gpsCoordinates.includes(",")) {
+    return { latitude: "0", longitude: "0" };
+  }
+  const [lat, lon] = gpsCoordinates.split(",").map((s) => s.trim());
+  return { latitude: lat || "0", longitude: lon || "0" };
+}
 
 export async function initContract(): Promise<void> {
   if (MOCK_MODE) {
@@ -46,11 +61,14 @@ export async function submitEvidence(
   isPublic: boolean,
   user: string,
 ): Promise<string> {
+  const { latitude, longitude } = parseGpsCoordinates(gpsCoordinates);
+
   if (MOCK_MODE) {
     mockEvidences.push({
       user,
       videoHash,
-      gpsCoordinates,
+      latitude,
+      longitude,
       timestamp: Math.floor(Date.now() / 1000),
       isPublic,
     });
@@ -62,21 +80,40 @@ export async function submitEvidence(
     console.log("  [MOCK] Blockchain submission skipped. Mock tx:", mockTxHash);
     return mockTxHash;
   }
-  const tx = await contract!.storeEvidence(videoHash, isPublic, user);
+  const tx = await contract!.storeEvidence(videoHash, isPublic, user, latitude, longitude);
   const receipt = await tx.wait();
   return receipt.hash;
+}
+
+/**
+ * Convert contract data to JSON-serializable format
+ * ethers.js v6 returns BigInt for numeric fields which can't be serialized to JSON
+ */
+function normalizeEvidenceData(evidence: any): any {
+  // Deep convert all values using a JSON replacer function
+  return JSON.parse(
+    JSON.stringify(evidence, (key, value) => {
+      // Convert BigInt to string with _bn suffix to preserve it's a number
+      if (typeof value === "bigint") {
+        return value.toString();
+      }
+      return value;
+    })
+  );
 }
 
 export async function getEvidencesByUser(walletAddress: string) {
   if (MOCK_MODE) {
     return mockEvidences.filter((e) => e.user === walletAddress);
   }
-  return contract!.getEvidencesByUser(walletAddress);
+  const evidence = await contract!.getEvidencesByUser(walletAddress);
+  return normalizeEvidenceData(evidence);
 }
 
 export async function getPublicEvidences() {
   if (MOCK_MODE) {
     return mockEvidences.filter((e) => e.isPublic);
   }
-  return contract!.getPublicFeed();
+  const evidence = await contract!.getPublicFeed();
+  return normalizeEvidenceData(evidence);
 }

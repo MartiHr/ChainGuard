@@ -1,203 +1,259 @@
-[
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "cid",
-        "type": "string"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "isPublic",
-        "type": "bool"
-      }
-    ],
-    "name": "EvidenceStored",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "name": "evidences",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "cid",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      },
-      {
-        "internalType": "bool",
-        "name": "isPublic",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "getEvidencesByUser",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "string",
-            "name": "cid",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "owner",
-            "type": "address"
-          },
-          {
-            "internalType": "bool",
-            "name": "isPublic",
-            "type": "bool"
-          }
-        ],
-        "internalType": "struct ChainGuard.Evidence[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getPublicFeed",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "string",
-            "name": "cid",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address",
-            "name": "owner",
-            "type": "address"
-          },
-          {
-            "internalType": "bool",
-            "name": "isPublic",
-            "type": "bool"
-          }
-        ],
-        "internalType": "struct ChainGuard.Evidence[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "publicCIDs",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_cid",
-        "type": "string"
-      },
-      {
-        "internalType": "bool",
-        "name": "_isPublic",
-        "type": "bool"
-      },
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "storeEvidence",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "userEvidences",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
+﻿[
+    {
+        "anonymous":  false,
+        "inputs":  [
+                       {
+                           "indexed":  false,
+                           "internalType":  "string",
+                           "name":  "cid",
+                           "type":  "string"
+                       },
+                       {
+                           "indexed":  true,
+                           "internalType":  "address",
+                           "name":  "owner",
+                           "type":  "address"
+                       },
+                       {
+                           "indexed":  false,
+                           "internalType":  "bool",
+                           "name":  "isPublic",
+                           "type":  "bool"
+                       },
+                       {
+                           "indexed":  false,
+                           "internalType":  "string",
+                           "name":  "latitude",
+                           "type":  "string"
+                       },
+                       {
+                           "indexed":  false,
+                           "internalType":  "string",
+                           "name":  "longitude",
+                           "type":  "string"
+                       }
+                   ],
+        "name":  "EvidenceStored",
+        "type":  "event"
+    },
+    {
+        "inputs":  [
+                       {
+                           "internalType":  "string",
+                           "name":  "",
+                           "type":  "string"
+                       }
+                   ],
+        "name":  "evidences",
+        "outputs":  [
+                        {
+                            "internalType":  "string",
+                            "name":  "cid",
+                            "type":  "string"
+                        },
+                        {
+                            "internalType":  "uint256",
+                            "name":  "timestamp",
+                            "type":  "uint256"
+                        },
+                        {
+                            "internalType":  "address",
+                            "name":  "owner",
+                            "type":  "address"
+                        },
+                        {
+                            "internalType":  "bool",
+                            "name":  "isPublic",
+                            "type":  "bool"
+                        },
+                        {
+                            "internalType":  "string",
+                            "name":  "latitude",
+                            "type":  "string"
+                        },
+                        {
+                            "internalType":  "string",
+                            "name":  "longitude",
+                            "type":  "string"
+                        }
+                    ],
+        "stateMutability":  "view",
+        "type":  "function"
+    },
+    {
+        "inputs":  [
+                       {
+                           "internalType":  "address",
+                           "name":  "user",
+                           "type":  "address"
+                       }
+                   ],
+        "name":  "getEvidencesByUser",
+        "outputs":  [
+                        {
+                            "components":  [
+                                               {
+                                                   "internalType":  "string",
+                                                   "name":  "cid",
+                                                   "type":  "string"
+                                               },
+                                               {
+                                                   "internalType":  "uint256",
+                                                   "name":  "timestamp",
+                                                   "type":  "uint256"
+                                               },
+                                               {
+                                                   "internalType":  "address",
+                                                   "name":  "owner",
+                                                   "type":  "address"
+                                               },
+                                               {
+                                                   "internalType":  "bool",
+                                                   "name":  "isPublic",
+                                                   "type":  "bool"
+                                               },
+                                               {
+                                                   "internalType":  "string",
+                                                   "name":  "latitude",
+                                                   "type":  "string"
+                                               },
+                                               {
+                                                   "internalType":  "string",
+                                                   "name":  "longitude",
+                                                   "type":  "string"
+                                               }
+                                           ],
+                            "internalType":  "struct ChainGuard.Evidence[]",
+                            "name":  "",
+                            "type":  "tuple[]"
+                        }
+                    ],
+        "stateMutability":  "view",
+        "type":  "function"
+    },
+    {
+        "inputs":  [
+
+                   ],
+        "name":  "getPublicFeed",
+        "outputs":  [
+                        {
+                            "components":  [
+                                               {
+                                                   "internalType":  "string",
+                                                   "name":  "cid",
+                                                   "type":  "string"
+                                               },
+                                               {
+                                                   "internalType":  "uint256",
+                                                   "name":  "timestamp",
+                                                   "type":  "uint256"
+                                               },
+                                               {
+                                                   "internalType":  "address",
+                                                   "name":  "owner",
+                                                   "type":  "address"
+                                               },
+                                               {
+                                                   "internalType":  "bool",
+                                                   "name":  "isPublic",
+                                                   "type":  "bool"
+                                               },
+                                               {
+                                                   "internalType":  "string",
+                                                   "name":  "latitude",
+                                                   "type":  "string"
+                                               },
+                                               {
+                                                   "internalType":  "string",
+                                                   "name":  "longitude",
+                                                   "type":  "string"
+                                               }
+                                           ],
+                            "internalType":  "struct ChainGuard.Evidence[]",
+                            "name":  "",
+                            "type":  "tuple[]"
+                        }
+                    ],
+        "stateMutability":  "view",
+        "type":  "function"
+    },
+    {
+        "inputs":  [
+                       {
+                           "internalType":  "uint256",
+                           "name":  "",
+                           "type":  "uint256"
+                       }
+                   ],
+        "name":  "publicCIDs",
+        "outputs":  [
+                        {
+                            "internalType":  "string",
+                            "name":  "",
+                            "type":  "string"
+                        }
+                    ],
+        "stateMutability":  "view",
+        "type":  "function"
+    },
+    {
+        "inputs":  [
+                       {
+                           "internalType":  "string",
+                           "name":  "_cid",
+                           "type":  "string"
+                       },
+                       {
+                           "internalType":  "bool",
+                           "name":  "_isPublic",
+                           "type":  "bool"
+                       },
+                       {
+                           "internalType":  "address",
+                           "name":  "user",
+                           "type":  "address"
+                       },
+                       {
+                           "internalType":  "string",
+                           "name":  "_latitude",
+                           "type":  "string"
+                       },
+                       {
+                           "internalType":  "string",
+                           "name":  "_longitude",
+                           "type":  "string"
+                       }
+                   ],
+        "name":  "storeEvidence",
+        "outputs":  [
+
+                    ],
+        "stateMutability":  "nonpayable",
+        "type":  "function"
+    },
+    {
+        "inputs":  [
+                       {
+                           "internalType":  "address",
+                           "name":  "",
+                           "type":  "address"
+                       },
+                       {
+                           "internalType":  "uint256",
+                           "name":  "",
+                           "type":  "uint256"
+                       }
+                   ],
+        "name":  "userEvidences",
+        "outputs":  [
+                        {
+                            "internalType":  "string",
+                            "name":  "",
+                            "type":  "string"
+                        }
+                    ],
+        "stateMutability":  "view",
+        "type":  "function"
+    }
 ]

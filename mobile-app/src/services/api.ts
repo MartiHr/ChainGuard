@@ -1,5 +1,6 @@
 // 10.0.2.2 is Android emulator's alias for host machine's localhost
-const API_BASE = "http://10.0.2.2:3000";
+// For physical devices, use your machine's IP address
+const API_BASE = process.env.EXPO_PUBLIC_API_BASE || "http://10.0.2.2:3000";
 
 export async function startSession(
   walletAddress: string,
@@ -47,8 +48,7 @@ export async function endSession(
   const res = await fetch(`${API_BASE}/sessions/${sessionId}/end`, {
     method: "POST",
   });
-  if (!res.ok) throw new Error(`endSession fa  winget install --id Google.AndroidSDK.PlatformTools -e
-  winget install --id Google.AndroidSDK.CommandlineTools -eiled: ${res.status}`);
+  if (!res.ok) throw new Error(`endSession failed: ${res.status}`);
   return res.json();
 }
 

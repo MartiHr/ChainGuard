@@ -7,6 +7,8 @@ contract ChainGuard {
         uint256 timestamp;   // Точно време на записа
         address owner;       // Кой е изпратил доказателството
         bool isPublic;       // Дали да се вижда в публичния фийд
+        string latitude;     // GPS координата - ширина
+        string longitude;    // GPS координата - дължина
     }
 
     // Търсене на доказателство по неговия CID
@@ -18,9 +20,9 @@ contract ChainGuard {
     // New: Track evidences per user
     mapping(address => string[]) public userEvidences;
 
-    event EvidenceStored(string cid, address indexed owner, bool isPublic);
+    event EvidenceStored(string cid, address indexed owner, bool isPublic, string latitude, string longitude);
 
-    function storeEvidence(string memory _cid, bool _isPublic, address user) public {
+    function storeEvidence(string memory _cid, bool _isPublic, address user, string memory _latitude, string memory _longitude) public {
         require(bytes(_cid).length > 0, "CID is required");
         require(evidences[_cid].timestamp == 0, "Evidence already exists");
 
@@ -28,7 +30,9 @@ contract ChainGuard {
             cid: _cid,
             timestamp: block.timestamp,
             owner: user,
-            isPublic: _isPublic
+            isPublic: _isPublic,
+            latitude: _latitude,
+            longitude: _longitude
         });
 
         // New: Track for user
@@ -38,7 +42,7 @@ contract ChainGuard {
             publicCIDs.push(_cid);
         }
 
-        emit EvidenceStored(_cid, user, _isPublic);
+        emit EvidenceStored(_cid, user, _isPublic, _latitude, _longitude);
     }
 
     // Функция за взимане на целия публичен фийд
