@@ -55,3 +55,11 @@ After setting the variable, you can run the deployment with the Sepolia network:
 ```shell
 npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
 ```
+
+---
+
+ACTUAL USAGE:
+
+-npx hardhat node
+-node scripts/deplay.js
+-get the CONTRACT_ADDRESS and set it up in the api and the video client
