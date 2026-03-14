@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import * as Linking from "expo-linking";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import { Video, ResizeMode } from "expo-av";
 import { decodeBase64, encodeBase64 } from "tweetnacl-util";
 import { getEvidenceByUser } from "../src/services/api";

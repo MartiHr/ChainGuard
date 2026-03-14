@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { CameraView, useCameraPermissions } from "expo-camera";
+import { CameraView, useCameraPermissions, useMicrophonePermissions } from "expo-camera";
 import * as Location from "expo-location";
 import * as SecureStore from "expo-secure-store";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import { startSession, uploadChunk, endSession } from "../src/services/api";
 
 type RecordingState = "initializing" | "recording" | "stopping" | "done";
@@ -17,6 +17,7 @@ export default function RecordingScreen() {
 
   const cameraRef = useRef<CameraView>(null);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const [micPermission, requestMicPermission] = useMicrophonePermissions();
   const [state, setState] = useState<RecordingState>("initializing");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [chunkCount, setChunkCount] = useState(0);
@@ -51,6 +52,9 @@ export default function RecordingScreen() {
       if (!cameraPermission?.granted) {
         await requestCameraPermission();
       }
+      if (!micPermission?.granted) {
+        await requestMicPermission();
+      }
       const { status: locStatus } =
         await Location.requestForegroundPermissionsAsync();
       if (locStatus !== "granted") {
@@ -78,11 +82,20 @@ export default function RecordingScreen() {
 
   async function recordLoop(sid: string) {
     let idx = 0;
+    // Wait for camera to fully initialize
+    await new Promise((r) => setTimeout(r, 1000));
+
     while (!stopRequested.current) {
       try {
         if (!cameraRef.current) {
-          await new Promise((r) => setTimeout(r, 200));
+          await new Promise((r) => setTimeout(r, 500));
           continue;
+        }
+
+        // Only stop a stale recording if one was in progress
+        if (isRecording.current) {
+          try { cameraRef.current.stopRecording(); } catch {}
+          await new Promise((r) => setTimeout(r, 500));
         }
 
         isRecording.current = true;
@@ -100,11 +113,14 @@ export default function RecordingScreen() {
         idx++;
         setChunkCount(idx);
       } catch (e: any) {
-        isRecording.current = false;
-        if (stopRequested.current) break;
         console.error("Chunk error:", e);
-        // Continue recording on non-fatal errors
-        await new Promise((r) => setTimeout(r, 1000));
+        if (isRecording.current) {
+          try { cameraRef.current?.stopRecording(); } catch {}
+          isRecording.current = false;
+        }
+        if (stopRequested.current) break;
+        // Longer delay before retrying to let camera recover
+        await new Promise((r) => setTimeout(r, 2000));
       }
     }
   }

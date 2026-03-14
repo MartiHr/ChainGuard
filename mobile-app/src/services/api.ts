@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:3000";
+// 10.0.2.2 is Android emulator's alias for host machine's localhost
+const API_BASE = "http://10.0.2.2:3000";
 
 export async function startSession(
   walletAddress: string,

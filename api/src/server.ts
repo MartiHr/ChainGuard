@@ -1,94 +1,151 @@
-import express from 'express';
-import type { Request, Response } from 'express';
-import multer from 'multer';
-import { ethers } from 'ethers';
-import pinataSDK from '@pinata/sdk';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const requiredEnv = ['PINATA_JWT', 'RPC_URL', 'PRIVATE_KEY', 'CONTRACT_ADDRESS'];
-for (const key of requiredEnv) {
-  if (!process.env[key]) {
-    throw new Error(`Environment variable ${key} is required`);
-  }
-}
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import multer from "multer";
+import { v4 as uuidv4 } from "uuid";
+import path from "path";
+import fs from "fs/promises";
+import { assembleVideo } from "./services/assembler";
+import { encryptVideo } from "./services/encryption";
+import { uploadToIPFS } from "./services/ipfs";
+import { submitEvidence, getEvidencesByUser, getPublicEvidences } from "./services/blockchain";
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
-
 app.use(cors());
 app.use(express.json());
 
-// 1. Инициализация на Pinata
-const pinata = new pinataSDK({ pinataJWTKey: process.env.PINATA_JWT });
-
-// 2. Блокчейн настройки
-const provider = new ethers.JsonRpcProvider(process.env.RPC_URL || "http://127.0.0.1:8545");
-const wallet = new ethers.Wallet(process.env.PRIVATE_KEY as string, provider);
-
-// Вземане на ABI
-const abiPath = path.join(__dirname, '../abis/ChainGuard.json');
-if (!fs.existsSync(abiPath)) {
-  throw new Error(`ABI file not found: ${abiPath}`);
+interface Session {
+  walletAddress: string;
+  publicKey: string;
+  isPublic: boolean;
+  gpsCoordinates: string;
+  chunkCount: number;
+  dir: string;
 }
-const contractABI = JSON.parse(fs.readFileSync(abiPath, 'utf8')).abi;
 
-const contract = new ethers.Contract(
-    process.env.CONTRACT_ADDRESS as string,
-    contractABI,
-    wallet
-);
+const sessions = new Map<string, Session>();
 
-// Ендпоинт за качване
-app.post('/upload', upload.single('video'), async (req: any, res: any) => {
-    try {
-        if (!req.file) return res.status(400).json({ error: "No video file provided" });
+// --- Start session ---
+app.post("/sessions", async (req, res) => {
+  try {
+    const { walletAddress, publicKey, isPublic, gpsCoordinates } = req.body;
+    const sessionId = uuidv4();
+    const dir = path.join(__dirname, "../uploads", sessionId);
+    await fs.mkdir(dir, { recursive: true });
 
-        console.log("🚀 Starting upload process...");
+    sessions.set(sessionId, {
+      walletAddress,
+      publicKey,
+      isPublic,
+      gpsCoordinates,
+      chunkCount: 0,
+      dir,
+    });
 
-        // А. Качване в IPFS чрез Pinata
-        const readableStreamForFile = fs.createReadStream(req.file.path);
-        const options = {
-            pinataMetadata: { name: `ChainGuard_${Date.now()}` },
-            pinataOptions: { cidVersion: 0 as const }
-        };
-
-        const pinataResponse = await pinata.pinFileToIPFS(readableStreamForFile, options);
-        const cid = pinataResponse.IpfsHash;
-        console.log("📦 IPFS CID:", cid);
-
-        // Б. Запис в Блокчейна (Hardhat Local)
-        console.log("⛓️ Recording to Blockchain...");
-        const isPublic = true;
-        const tx = await contract.storeEvidence(cid, isPublic);
-        const receipt = await tx.wait();
-
-        // Почистване на локалния файл
-        fs.unlinkSync(req.file.path);
-
-        return res.json({
-            success: true,
-            cid: cid,
-            transactionHash: receipt.hash,
-            ipfsUrl: `https://gateway.pinata.cloud/ipfs/${cid}`
-        });
-
-    } catch (error: any) {
-        console.error("❌ Error:", error);
-        return res.status(500).json({ error: error.message });
-    }
+    res.json({ sessionId });
+  } catch (error) {
+    console.error("Error starting session:", error);
+    res.status(500).json({ error: "Failed to start session" });
+  }
 });
 
-const PORT = process.env.PORT || 5000;
+// --- Receive chunk ---
+const upload = multer({ dest: "uploads/tmp/" });
+
+app.post("/sessions/:sessionId/chunks", upload.single("chunk"), async (req, res) => {
+  try {
+    const sessionId = req.params.sessionId as string;
+    const session = sessions.get(sessionId);
+    if (!session) {
+      res.status(404).json({ error: "Session not found" });
+      return;
+    }
+
+    const chunkIndex = session.chunkCount;
+    const destPath = path.join(session.dir, `chunk_${String(chunkIndex).padStart(5, "0")}.mp4`);
+    await fs.rename(req.file!.path, destPath);
+
+    if (req.body.gpsCoordinates) {
+      session.gpsCoordinates = req.body.gpsCoordinates;
+    }
+
+    session.chunkCount++;
+    console.log(`Session ${sessionId}: received chunk ${chunkIndex}`);
+    res.json({ received: true, chunkIndex });
+  } catch (error) {
+    console.error("Error receiving chunk:", error);
+    res.status(500).json({ error: "Failed to receive chunk" });
+  }
+});
+
+// --- End session (triggers finalization) ---
+app.post("/sessions/:sessionId/end", async (req, res) => {
+  try {
+    const sessionId = req.params.sessionId as string;
+    const session = sessions.get(sessionId);
+    if (!session) {
+      res.status(404).json({ error: "Session not found" });
+      return;
+    }
+
+    console.log(`Session ${sessionId}: finalizing (${session.chunkCount} chunks)...`);
+
+    // 1. Assemble chunks into single video
+    const assembledPath = path.join(session.dir, "final.mp4");
+    await assembleVideo(session.dir, assembledPath);
+    console.log("  Video assembled.");
+
+    // 2. Encrypt if private
+    let fileToUpload: Buffer;
+    if (!session.isPublic) {
+      fileToUpload = await encryptVideo(assembledPath, session.publicKey);
+      console.log("  Video encrypted.");
+    } else {
+      fileToUpload = await fs.readFile(assembledPath);
+    }
+
+    // 3. Upload to IPFS
+    const fileName = session.isPublic ? "evidence.mp4" : "evidence.enc";
+    const cid = await uploadToIPFS(fileToUpload, fileName);
+    console.log(`  Uploaded to IPFS: ${cid}`);
+
+    // 4. Submit to blockchain
+    const transactionHash = await submitEvidence(cid, session.gpsCoordinates, session.isPublic);
+    console.log(`  Submitted to blockchain: ${transactionHash}`);
+
+    // 5. Cleanup
+    await fs.rm(session.dir, { recursive: true });
+    sessions.delete(req.params.sessionId);
+
+    res.json({ cid, transactionHash });
+  } catch (error) {
+    console.error("Error finalizing session:", error);
+    res.status(500).json({ error: "Failed to finalize session" });
+  }
+});
+
+// --- Query evidence (public must be before :walletAddress to avoid matching "public" as an address) ---
+app.get("/evidence/public", async (_req, res) => {
+  try {
+    const evidence = await getPublicEvidences();
+    res.json(evidence);
+  } catch (error) {
+    console.error("Error fetching public evidence:", error);
+    res.status(500).json({ error: "Failed to fetch public evidence" });
+  }
+});
+
+app.get("/evidence/:walletAddress", async (req, res) => {
+  try {
+    const evidence = await getEvidencesByUser(req.params.walletAddress as string);
+    res.json(evidence);
+  } catch (error) {
+    console.error("Error fetching evidence:", error);
+    res.status(500).json({ error: "Failed to fetch evidence" });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`✅ Relay API is running on http://localhost:${PORT}`);
-    console.log(`🔗 Connected to Contract: ${process.env.CONTRACT_ADDRESS}`);
+  console.log(`ChainGuard backend running on :${PORT}`);
 });

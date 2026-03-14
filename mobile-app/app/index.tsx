@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, ActivityIndicator, StyleSheet, Platform } from "react-native";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Redirect } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 
@@ -8,19 +8,10 @@ export default function Index() {
   const [hasAccount, setHasAccount] = useState(false);
 
   useEffect(() => {
-    const promise =
-      Platform.OS === "web"
-        ? Promise.resolve(localStorage.getItem("seedPhrase"))
-        : SecureStore.getItemAsync("seedPhrase");
-
-    promise
-      .then((value) => {
-        setHasAccount(!!value);
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
+    SecureStore.getItemAsync("seedPhrase").then((value) => {
+      setHasAccount(!!value);
+      setIsLoading(false);
+    });
   }, []);
 
   if (isLoading) {
