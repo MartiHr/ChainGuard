@@ -31,6 +31,6 @@ export const CONTRACT_ABI = [
 
 // Dummy config
 export const CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000000";
-export const RPC_URL = "https://sepolia.infura.io/v3/YOUR_INFURA_KEY";
+export const RPC_URL = "https://rpc-amoy.polygon.technology/";
 export const IPFS_GATEWAY = "https://gateway.pinata.cloud/ipfs";
 export const EXPLORER_URL = "https://sepolia.etherscan.io/tx";

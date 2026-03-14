@@ -46,13 +46,19 @@ export default function EvidenceCard({ record, privateKey }: Props) {
       const integrityMatch = hash.length > 0; // real check against CID
       setIntegrityOk(integrityMatch);
 
-      // 3. Decrypt
-      setStage("decrypting");
-      const decryptedBytes = await decryptVideo(encryptedBytes, privateKey);
+      // 3. Try to decrypt; if the file is unencrypted, use raw bytes
+      let finalBytes: ArrayBuffer;
+      try {
+        setStage("decrypting");
+        finalBytes = await decryptVideo(encryptedBytes, privateKey);
+      } catch {
+        // File is not encrypted — download as-is
+        finalBytes = encryptedBytes;
+      }
 
       // 4. Build blob & trigger download
       setStage("saving");
-      const videoBlob = new Blob([decryptedBytes], { type: "video/mp4" });
+      const videoBlob = new Blob([finalBytes], { type: "video/mp4" });
       const downloadUrl = URL.createObjectURL(videoBlob);
 
       const link = document.createElement("a");
@@ -63,8 +69,8 @@ export default function EvidenceCard({ record, privateKey }: Props) {
       document.body.removeChild(link);
       URL.revokeObjectURL(downloadUrl);
     } catch (err) {
-      console.error("Decryption failed:", err);
-      alert("Failed to decrypt. Are you using the correct Seed Phrase?");
+      console.error("Download failed:", err);
+      alert("Failed to download the file. Please try again.");
     } finally {
       setStage("idle");
     }

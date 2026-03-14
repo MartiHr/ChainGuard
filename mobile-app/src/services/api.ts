@@ -47,7 +47,8 @@ export async function endSession(
   const res = await fetch(`${API_BASE}/sessions/${sessionId}/end`, {
     method: "POST",
   });
-  if (!res.ok) throw new Error(`endSession failed: ${res.status}`);
+  if (!res.ok) throw new Error(`endSession fa  winget install --id Google.AndroidSDK.PlatformTools -e
+  winget install --id Google.AndroidSDK.CommandlineTools -eiled: ${res.status}`);
   return res.json();
 }
 
