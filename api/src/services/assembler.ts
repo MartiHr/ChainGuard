@@ -3,6 +3,8 @@ import { promisify } from "util";
 import fs from "fs/promises";
 import path from "path";
 
+const ffmpegPath = require("ffmpeg-static") as string | null;
+
 const execAsync = promisify(exec);
 
 export async function assembleVideo(
@@ -26,7 +28,8 @@ export async function assembleVideo(
   await fs.writeFile(concatFilePath, concatContent);
 
   // Concatenate with ffmpeg
+  const ffmpegBin = ffmpegPath ?? "ffmpeg";
   await execAsync(
-    `ffmpeg -f concat -safe 0 -i "${concatFilePath}" -c:v copy -c:a aac "${outputPath}"`,
+    `"${ffmpegBin}" -f concat -safe 0 -i "${concatFilePath}" -c:v copy -c:a aac "${outputPath}"`,
   );
 }

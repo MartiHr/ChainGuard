@@ -13,7 +13,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import * as Linking from "expo-linking";
 import * as FileSystem from "expo-file-system/legacy";
-import { Video, ResizeMode } from "expo-av";
 import { decodeBase64, encodeBase64 } from "tweetnacl-util";
 import { getEvidenceByUser } from "../src/services/api";
 import { decryptVideo } from "../src/services/decryption";
@@ -24,6 +23,16 @@ import { EvidenceCard } from "../src/components/EvidenceCard";
 
 const PINATA_GATEWAY = process.env.EXPO_PUBLIC_PINATA_GATEWAY || "moccasin-glamorous-penguin-689.mypinata.cloud";
 
+let ExpoVideo: any = null;
+let ExpoResizeMode: any = { CONTAIN: "contain" };
+try {
+  const expoAv = require("expo-av");
+  ExpoVideo = expoAv.Video;
+  ExpoResizeMode = expoAv.ResizeMode;
+} catch {
+  // Keep route loadable when expo-av native module is missing.
+}
+
 
 export default function MyEvidenceScreen() {
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
@@ -31,7 +40,7 @@ export default function MyEvidenceScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [decrypting, setDecrypting] = useState(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
-  const videoRef = useRef<Video>(null);
+  const videoRef = useRef<any>(null);
 
   const fetchEvidence = useCallback(async () => {
     try {
@@ -156,14 +165,30 @@ export default function MyEvidenceScreen() {
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
           {videoUri && (
-            <Video
-              ref={videoRef}
-              source={{ uri: videoUri }}
-              style={styles.video}
-              useNativeControls
-              resizeMode={ResizeMode.CONTAIN}
-              shouldPlay
-            />
+            ExpoVideo ? (
+              <ExpoVideo
+                ref={videoRef}
+                source={{ uri: videoUri }}
+                style={styles.video}
+                useNativeControls
+                resizeMode={ExpoResizeMode.CONTAIN}
+                shouldPlay
+              />
+            ) : (
+              <View style={styles.fallbackContainer}>
+                <Text style={styles.fallbackText}>Video playback module is unavailable in this build.</Text>
+                <TouchableOpacity
+                  style={styles.openExternallyButton}
+                  onPress={() => {
+                    if (videoUri) {
+                      Linking.openURL(videoUri);
+                    }
+                  }}
+                >
+                  <Text style={styles.openExternallyButtonText}>Open Externally</Text>
+                </TouchableOpacity>
+              </View>
+            )
           )}
         </SafeAreaView>
       </Modal>
@@ -207,5 +232,28 @@ const styles = StyleSheet.create({
   },
   video: {
     flex: 1,
+  },
+  fallbackContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+    gap: 16,
+  },
+  fallbackText: {
+    color: "#ffffff",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  openExternallyButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: "#e94560",
+  },
+  openExternallyButtonText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
