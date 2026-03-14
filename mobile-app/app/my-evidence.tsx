@@ -42,7 +42,11 @@ function EvidenceCard({
   isDecrypting: boolean;
 }) {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} disabled={isDecrypting}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={onPress}
+      disabled={isDecrypting}
+    >
       <View style={styles.cardHeader}>
         <Text style={styles.timestamp}>{formatTimestamp(item.timestamp)}</Text>
         <View
@@ -57,9 +61,7 @@ function EvidenceCard({
         </View>
       </View>
       <Text style={styles.detail}>GPS: {item.gpsCoordinates}</Text>
-      <Text style={styles.detail}>
-        CID: {item.videoHash.slice(0, 16)}...
-      </Text>
+      <Text style={styles.detail}>CID: {item.videoHash.slice(0, 16)}...</Text>
     </TouchableOpacity>
   );
 }
@@ -103,7 +105,7 @@ export default function MyEvidenceScreen() {
       const downloadPath = FileSystem.cacheDirectory + "encrypted_evidence";
       const download = await FileSystem.downloadAsync(
         `https://${PINATA_GATEWAY}/ipfs/${item.videoHash}`,
-        downloadPath
+        downloadPath,
       );
 
       // 2. Read as base64 and convert to Uint8Array

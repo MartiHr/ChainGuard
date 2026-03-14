@@ -8,7 +8,11 @@ import fs from "fs/promises";
 import { assembleVideo } from "./services/assembler";
 import { encryptVideo } from "./services/encryption";
 import { uploadToIPFS } from "./services/ipfs";
-import { submitEvidence, getEvidencesByUser, getPublicEvidences } from "./services/blockchain";
+import {
+  submitEvidence,
+  getEvidencesByUser,
+  getPublicEvidences,
+} from "./services/blockchain";
 
 const app = express();
 app.use(cors());
@@ -52,31 +56,38 @@ app.post("/sessions", async (req, res) => {
 // --- Receive chunk ---
 const upload = multer({ dest: "uploads/tmp/" });
 
-app.post("/sessions/:sessionId/chunks", upload.single("chunk"), async (req, res) => {
-  try {
-    const sessionId = req.params.sessionId as string;
-    const session = sessions.get(sessionId);
-    if (!session) {
-      res.status(404).json({ error: "Session not found" });
-      return;
+app.post(
+  "/sessions/:sessionId/chunks",
+  upload.single("chunk"),
+  async (req, res) => {
+    try {
+      const sessionId = req.params.sessionId as string;
+      const session = sessions.get(sessionId);
+      if (!session) {
+        res.status(404).json({ error: "Session not found" });
+        return;
+      }
+
+      const chunkIndex = session.chunkCount;
+      const destPath = path.join(
+        session.dir,
+        `chunk_${String(chunkIndex).padStart(5, "0")}.mp4`,
+      );
+      await fs.rename(req.file!.path, destPath);
+
+      if (req.body.gpsCoordinates) {
+        session.gpsCoordinates = req.body.gpsCoordinates;
+      }
+
+      session.chunkCount++;
+      console.log(`Session ${sessionId}: received chunk ${chunkIndex}`);
+      res.json({ received: true, chunkIndex });
+    } catch (error) {
+      console.error("Error receiving chunk:", error);
+      res.status(500).json({ error: "Failed to receive chunk" });
     }
-
-    const chunkIndex = session.chunkCount;
-    const destPath = path.join(session.dir, `chunk_${String(chunkIndex).padStart(5, "0")}.mp4`);
-    await fs.rename(req.file!.path, destPath);
-
-    if (req.body.gpsCoordinates) {
-      session.gpsCoordinates = req.body.gpsCoordinates;
-    }
-
-    session.chunkCount++;
-    console.log(`Session ${sessionId}: received chunk ${chunkIndex}`);
-    res.json({ received: true, chunkIndex });
-  } catch (error) {
-    console.error("Error receiving chunk:", error);
-    res.status(500).json({ error: "Failed to receive chunk" });
-  }
-});
+  },
+);
 
 // --- End session (triggers finalization) ---
 app.post("/sessions/:sessionId/end", async (req, res) => {
@@ -88,7 +99,9 @@ app.post("/sessions/:sessionId/end", async (req, res) => {
       return;
     }
 
-    console.log(`Session ${sessionId}: finalizing (${session.chunkCount} chunks)...`);
+    console.log(
+      `Session ${sessionId}: finalizing (${session.chunkCount} chunks)...`,
+    );
 
     // 1. Assemble chunks into single video
     const assembledPath = path.join(session.dir, "final.mp4");
@@ -110,7 +123,12 @@ app.post("/sessions/:sessionId/end", async (req, res) => {
     console.log(`  Uploaded to IPFS: ${cid}`);
 
     // 4. Submit to blockchain
-    const transactionHash = await submitEvidence(cid, session.gpsCoordinates, session.isPublic, session.walletAddress);
+    const transactionHash = await submitEvidence(
+      cid,
+      session.gpsCoordinates,
+      session.isPublic,
+      session.walletAddress,
+    );
     console.log(`  Submitted to blockchain: ${transactionHash}`);
 
     // 5. Cleanup
@@ -137,7 +155,9 @@ app.get("/evidence/public", async (_req, res) => {
 
 app.get("/evidence/:walletAddress", async (req, res) => {
   try {
-    const evidence = await getEvidencesByUser(req.params.walletAddress as string);
+    const evidence = await getEvidencesByUser(
+      req.params.walletAddress as string,
+    );
     res.json(evidence);
   } catch (error) {
     console.error("Error fetching evidence:", error);

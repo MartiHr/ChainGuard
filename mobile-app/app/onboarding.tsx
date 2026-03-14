@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Switch,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
@@ -70,7 +64,10 @@ export default function OnboardingScreen() {
           </Text>
         </View>
         <TouchableOpacity
-          style={[styles.button, (!confirmed || saving) && styles.buttonDisabled]}
+          style={[
+            styles.button,
+            (!confirmed || saving) && styles.buttonDisabled,
+          ]}
           onPress={handleContinue}
           disabled={!confirmed || saving}
         >

@@ -8,8 +8,13 @@ export function generateSeedPhrase(): string {
 }
 
 export async function deriveKeys(
-  seedPhrase: string
-): Promise<{ publicKey: Uint8Array; privateKey: Uint8Array; address: string; ethPrivateKey: string }> {
+  seedPhrase: string,
+): Promise<{
+  publicKey: Uint8Array;
+  privateKey: Uint8Array;
+  address: string;
+  ethPrivateKey: string;
+}> {
   const seed = await bip39.mnemonicToSeed(seedPhrase);
   const first32 = new Uint8Array(seed.buffer, seed.byteOffset, 32);
   const keyPair = nacl.box.keyPair.fromSecretKey(first32);
