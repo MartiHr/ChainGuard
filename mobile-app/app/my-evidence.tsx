@@ -22,9 +22,9 @@ import { deriveKeys } from "../src/services/keys";
 const PINATA_GATEWAY = "moccasin-glamorous-penguin-689.mypinata.cloud";
 
 interface EvidenceItem {
-  videoHash: string;
-  gpsCoordinates: string;
+  cid: string;
   timestamp: number;
+  owner: string;
   isPublic: boolean;
 }
 

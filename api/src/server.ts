@@ -9,6 +9,7 @@ import { assembleVideo } from "./services/assembler";
 import { encryptVideo } from "./services/encryption";
 import { uploadToIPFS } from "./services/ipfs";
 import {
+  initContract,
   submitEvidence,
   getEvidencesByUser,
   getPublicEvidences,
@@ -166,6 +167,16 @@ app.get("/evidence/:walletAddress", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+
+// Initialize blockchain connection
+initContract()
+  .then(() => {
+    console.log("Connected to local blockchain");
+  })
+  .catch((error: any) => {
+    console.error("Failed to connect to blockchain:", error);
+  });
+
 app.listen(PORT, () => {
   console.log(`ChainGuard backend running on :${PORT}`);
 });

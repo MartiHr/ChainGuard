@@ -26,6 +26,20 @@ function getContract() {
 
 const contract = getContract();
 
+export async function initContract(): Promise<void> {
+  if (MOCK_MODE) {
+    console.log("Running in mock mode - no blockchain connection needed");
+    return;
+  }
+  try {
+    // Test connection by getting the block number
+    const provider = contract!.provider as ethers.Provider;
+    await provider.getBlockNumber();
+  } catch (error) {
+    throw new Error(`Failed to connect to blockchain: ${error}`);
+  }
+}
+
 export async function submitEvidence(
   videoHash: string,
   gpsCoordinates: string,
