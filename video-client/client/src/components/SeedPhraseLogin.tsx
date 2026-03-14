@@ -3,6 +3,8 @@ import type { WalletState } from "../types.ts";
 import { walletFromMnemonic } from "../blockchain.ts";
 import ThemeToggle from "./ThemeToggle.tsx";
 
+import chainGuardLogo from "../assets/ChainGuard.png";
+
 interface Props {
   onLogin: (wallet: WalletState) => void;
   dark: boolean;
@@ -87,7 +89,9 @@ export default function SeedPhraseLogin({ onLogin, dark, onToggleTheme }: Props)
       </div>
       <div className="login-card">
         <div className="login-header">
-          <div className="shield-icon">🛡️</div>
+          <div className="shield-icon">
+            <img src={chainGuardLogo} alt="ChainGuard" className="logo-img" />
+          </div>
           <h1>ChainGuard</h1>
           <p className="subtitle">Tamper-Proof Evidence Dashboard</p>
         </div>

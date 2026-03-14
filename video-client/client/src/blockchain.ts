@@ -2,10 +2,6 @@ import { ethers } from "ethers";
 import type { WalletState, EvidenceRecord } from "./types.ts";
 import { CONTRACT_ABI, CONTRACT_ADDRESS, RPC_URL } from "./config.ts";
 
-/**
- * Derive a wallet from a BIP-39 mnemonic seed phrase.
- * The private key is returned but must only live in React state.
- */
 export function walletFromMnemonic(mnemonic: string): WalletState {
   const trimmed = mnemonic.trim().toLowerCase().replace(/\s+/g, " ");
   const wallet = ethers.HDNodeWallet.fromPhrase(trimmed);
@@ -16,9 +12,6 @@ export function walletFromMnemonic(mnemonic: string): WalletState {
   };
 }
 
-/**
- * Fetch all evidence records owned by `walletAddress` from the smart contract.
- */
 export async function fetchRecords(
   walletAddress: string,
 ): Promise<EvidenceRecord[]> {

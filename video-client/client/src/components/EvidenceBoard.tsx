@@ -3,6 +3,7 @@ import type { WalletState, EvidenceRecord } from "../types.ts";
 import { fetchRecords } from "../blockchain.ts";
 import EvidenceCard from "./EvidenceCard.tsx";
 import ThemeToggle from "./ThemeToggle.tsx";
+import chainGuardLogo from "../assets/ChainGuard.png";
 
 interface Props {
   wallet: WalletState;
@@ -88,7 +89,9 @@ export default function EvidenceBoard({ wallet, onLogout, dark, onToggleTheme }:
       {/* Header */}
       <header className="dashboard-header">
         <div className="header-left">
-          <span className="logo">🛡️ ChainGuard</span>
+          <span className="logo">
+            ChainGuard
+          </span>
           <span className="header-divider">|</span>
           <span className="header-subtitle">Evidence Dashboard</span>
         </div>

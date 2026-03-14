@@ -94,6 +94,14 @@ body {
 .shield-icon {
   font-size: 3rem;
   margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.logo-img {
+  width: 240px;
+  height: 150px;
+  object-fit:none;
 }
 
 .login-header h1 {
@@ -283,7 +291,7 @@ body {
 }
 
 .logo {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
