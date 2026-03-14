@@ -1,7 +1,7 @@
 // @ts-ignore
 // @ts-ignore
 import { ethers } from "ethers";
-import ChainGuardABI from "../abi/ChainGuard.json";
+import ChainGuardABI from "../../../abi/ChainGuard.json";
 
 const MOCK_MODE =
   !process.env.CONTRACT_ADDRESS || !process.env.BACKEND_PRIVATE_KEY;

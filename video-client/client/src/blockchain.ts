@@ -1,6 +1,8 @@
 import { ethers } from 'ethers';
 import type { WalletState, EvidenceRecord } from './types.ts';
-import { CONTRACT_ABI, CONTRACT_ADDRESS, RPC_URL } from './config.ts';
+import { CONTRACT_ADDRESS, RPC_URL } from './config.ts';
+
+import ChainGuardABI from '../../../abi/ChainGuard.json';
 
 export function walletFromMnemonic(mnemonic: string): WalletState {
   const trimmed = mnemonic.trim().toLowerCase().replace(/\s+/g, ' ');
@@ -12,38 +14,27 @@ export function walletFromMnemonic(mnemonic: string): WalletState {
   };
 }
 
-function mapRawRecords(
-  raw: Array<{
-    cid: string;
-    timestamp: bigint;
-    owner: string;
-    isPublic: boolean;
-    latitude: string;
-    longitude: string;
-  }>
-): EvidenceRecord[] {
-  return raw.map((r, index) => ({
-    id: index,
-    cid: r.cid,
-    timestamp: Number(r.timestamp),
-    latitude: r.latitude,
-    longitude: r.longitude,
-    txHash: '',
-    owner: r.owner,
-  }));
-}
-
 export async function fetchRecords(
   walletAddress: string
 ): Promise<EvidenceRecord[]> {
   const provider = new ethers.JsonRpcProvider(RPC_URL);
   const contract = new ethers.Contract(
     CONTRACT_ADDRESS,
-    CONTRACT_ABI,
+    ChainGuardABI,
     provider
   );
 
-  // Fetch only the records that belong to this wallet address
+  // Make sure this is a view function in Solidity
   const raw = await contract.getEvidencesByUser(walletAddress);
-  return mapRawRecords(raw);
+
+  // Convert BigNumbers properly
+  return raw.map((r: any, index: number) => ({
+    id: index,
+    cid: r.cid,
+    timestamp: Number(r.timestamp.toString()), // if it's BigNumber
+    latitude: r.latitude,
+    longitude: r.longitude,
+    txHash: '', // Optional, can add if needed
+    owner: r.owner,
+  }));
 }

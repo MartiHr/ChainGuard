@@ -1,4 +1,4 @@
-import EvidenceCard from '../evidence-card/EvidenceCard.tsx';
+import EvidenceCard from '../evidence-card/index.tsx';
 import { Header } from './header/index.tsx';
 import type { EvidenceBoardProps } from './models.ts';
 import { StatsBar } from './start-bar/index.tsx';
@@ -10,7 +10,7 @@ export default function EvidenceBoard({
   dark,
   onToggleTheme,
 }: EvidenceBoardProps) {
-  const { records, loading, error, useDemoData } = useBlockchainData(wallet);
+  const { records, loading, error } = useBlockchainData(wallet);
 
   return (
     <div className="dashboard">
@@ -25,12 +25,6 @@ export default function EvidenceBoard({
 
       {/* Notices */}
       {error && <div className="notice notice-warn">{error}</div>}
-      {useDemoData && (
-        <div className="notice notice-info">
-          ℹ️ These are placeholder records. Connect to a deployed contract to
-          see real evidence.
-        </div>
-      )}
 
       {/* Content */}
       {loading ? (

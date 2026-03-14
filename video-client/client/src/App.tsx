@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { WalletState } from './types.ts';
-import SeedPhraseLogin from './components/seed-phrase-login/SeedPhraseLogin.tsx';
+import SeedPhraseLogin from './components/seed-phrase-login/index.tsx';
 import EvidenceBoard from './components/evidence-board/index.tsx';
 
 export default function App() {

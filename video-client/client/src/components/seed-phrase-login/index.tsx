@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { walletFromMnemonic } from '../../blockchain.ts';
 import ThemeToggle from '../theme-toggle/index.tsx';
 
-import chainGuardLogo from '../assets/ChainGuard.png';
+import chainGuardLogo from '../../assets/ChainGuard.png';
 import type { SeedPhraseLoginProps } from './models.ts';
 
 export default function SeedPhraseLogin({
