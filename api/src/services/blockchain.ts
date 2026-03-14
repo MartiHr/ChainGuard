@@ -24,11 +24,12 @@ const contract = getContract();
 export async function submitEvidence(
   videoHash: string,
   gpsCoordinates: string,
-  isPublic: boolean
+  isPublic: boolean,
+  user: string
 ): Promise<string> {
   if (MOCK_MODE) {
     mockEvidences.push({
-      user: "0x0000000000000000000000000000000000000000",
+      user,
       videoHash,
       gpsCoordinates,
       timestamp: Math.floor(Date.now() / 1000),
@@ -38,7 +39,7 @@ export async function submitEvidence(
     console.log("  [MOCK] Blockchain submission skipped. Mock tx:", mockTxHash);
     return mockTxHash;
   }
-  const tx = await contract!.submitEvidence(videoHash, gpsCoordinates, isPublic);
+  const tx = await contract!.storeEvidence(videoHash, isPublic, user);
   const receipt = await tx.wait();
   return receipt.hash;
 }
@@ -54,5 +55,5 @@ export async function getPublicEvidences() {
   if (MOCK_MODE) {
     return mockEvidences.filter((e) => e.isPublic);
   }
-  return contract!.getPublicEvidences();
+  return contract!.getPublicFeed();
 }

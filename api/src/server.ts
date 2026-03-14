@@ -110,7 +110,7 @@ app.post("/sessions/:sessionId/end", async (req, res) => {
     console.log(`  Uploaded to IPFS: ${cid}`);
 
     // 4. Submit to blockchain
-    const transactionHash = await submitEvidence(cid, session.gpsCoordinates, session.isPublic);
+    const transactionHash = await submitEvidence(cid, session.gpsCoordinates, session.isPublic, session.walletAddress);
     console.log(`  Submitted to blockchain: ${transactionHash}`);
 
     // 5. Cleanup

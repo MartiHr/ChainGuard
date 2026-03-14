@@ -34,6 +34,7 @@ export default function OnboardingScreen() {
       const pubKeyBase64 = publicKeyToBase64(keys.publicKey);
       await SecureStore.setItemAsync("seedPhrase", seedPhrase);
       await SecureStore.setItemAsync("publicKey", pubKeyBase64);
+      await SecureStore.setItemAsync("walletAddress", keys.address);
       router.replace("/home");
     } catch (e) {
       console.error("Failed to save keys:", e);

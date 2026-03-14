@@ -5,7 +5,10 @@ import path from "path";
 
 const execAsync = promisify(exec);
 
-export async function assembleVideo(chunkDir: string, outputPath: string): Promise<void> {
+export async function assembleVideo(
+  chunkDir: string,
+  outputPath: string,
+): Promise<void> {
   // List all chunk files in order
   const files = (await fs.readdir(chunkDir))
     .filter((f) => f.startsWith("chunk_"))
@@ -24,6 +27,6 @@ export async function assembleVideo(chunkDir: string, outputPath: string): Promi
 
   // Concatenate with ffmpeg
   await execAsync(
-    `ffmpeg -f concat -safe 0 -i "${concatFilePath}" -c copy "${outputPath}"`
+    `ffmpeg -f concat -safe 0 -i "${concatFilePath}" -c:v copy -c:a aac "${outputPath}"`,
   );
 }

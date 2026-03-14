@@ -74,9 +74,9 @@ export default function MyEvidenceScreen() {
 
   const fetchEvidence = useCallback(async () => {
     try {
-      const publicKey = await SecureStore.getItemAsync("publicKey");
-      if (!publicKey) return;
-      const data = await getEvidenceByUser(publicKey);
+      const walletAddress = await SecureStore.getItemAsync("walletAddress");
+      if (!walletAddress) return;
+      const data = await getEvidenceByUser(walletAddress);
       setEvidence(data);
     } catch (e) {
       console.error("Failed to fetch evidence:", e);
