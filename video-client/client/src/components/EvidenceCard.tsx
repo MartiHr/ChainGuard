@@ -5,7 +5,7 @@ import { EXPLORER_URL } from "../config.ts";
 
 interface Props {
   record: EvidenceRecord;
-  privateKey: string;
+  mnemonic: string;
 }
 
 const STAGE_LABELS: Record<DownloadStage, string> = {
@@ -16,7 +16,7 @@ const STAGE_LABELS: Record<DownloadStage, string> = {
   saving: "💾 Saving to Disk…",
 };
 
-export default function EvidenceCard({ record, privateKey }: Props) {
+export default function EvidenceCard({ record, mnemonic }: Props) {
   const [stage, setStage] = useState<DownloadStage>("idle");
   const [integrityOk, setIntegrityOk] = useState<boolean | null>(null);
 
@@ -50,7 +50,7 @@ export default function EvidenceCard({ record, privateKey }: Props) {
       let finalBytes: ArrayBuffer;
       try {
         setStage("decrypting");
-        finalBytes = await decryptVideo(encryptedBytes, privateKey);
+        finalBytes = await decryptVideo(encryptedBytes, mnemonic);
       } catch {
         // File is not encrypted — download as-is
         finalBytes = encryptedBytes;
