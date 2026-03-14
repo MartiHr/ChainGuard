@@ -6,12 +6,17 @@ export async function startSession(
   walletAddress: string,
   publicKey: string,
   isPublic: boolean,
-  gpsCoordinates: string
+  gpsCoordinates: string,
 ): Promise<string> {
   const res = await fetch(`${API_BASE}/sessions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ walletAddress, publicKey, isPublic, gpsCoordinates }),
+    body: JSON.stringify({
+      walletAddress,
+      publicKey,
+      isPublic,
+      gpsCoordinates,
+    }),
   });
   if (!res.ok) throw new Error(`startSession failed: ${res.status}`);
   const data = await res.json();
@@ -22,7 +27,7 @@ export async function uploadChunk(
   sessionId: string,
   chunkUri: string,
   chunkIndex: number,
-  gpsCoordinates?: string
+  gpsCoordinates?: string,
 ): Promise<void> {
   const formData = new FormData();
   formData.append("chunk", {
@@ -43,7 +48,7 @@ export async function uploadChunk(
 }
 
 export async function endSession(
-  sessionId: string
+  sessionId: string,
 ): Promise<{ cid: string; transactionHash: string }> {
   const res = await fetch(`${API_BASE}/sessions/${sessionId}/end`, {
     method: "POST",
@@ -52,9 +57,7 @@ export async function endSession(
   return res.json();
 }
 
-export async function getEvidenceByUser(
-  walletAddress: string
-): Promise<any[]> {
+export async function getEvidenceByUser(walletAddress: string): Promise<any[]> {
   const res = await fetch(`${API_BASE}/evidence/${walletAddress}`);
   if (!res.ok) throw new Error(`getEvidenceByUser failed: ${res.status}`);
   return res.json();

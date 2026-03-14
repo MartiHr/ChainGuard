@@ -57,8 +57,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "46e981b7-63e6-4491-a7a4-5df72caae43f"
+        "projectId": "aec6326d-93ff-4070-a9a5-a4f006add824"
       }
-    }
+    },
+    "owner": "radintiholov"
   }
 }

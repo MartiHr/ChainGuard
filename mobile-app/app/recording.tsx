@@ -2,7 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { CameraView, useCameraPermissions, useMicrophonePermissions } from "expo-camera";
+import {
+  CameraView,
+  useCameraPermissions,
+  useMicrophonePermissions,
+} from "expo-camera";
 import * as Location from "expo-location";
 import * as SecureStore from "expo-secure-store";
 import * as FileSystem from "expo-file-system/legacy";
@@ -70,7 +74,12 @@ export default function RecordingScreen() {
       }
 
       const coords = await getGps();
-      const sid = await startSession(walletAddress, publicKey, isPublic, coords);
+      const sid = await startSession(
+        walletAddress,
+        publicKey,
+        isPublic,
+        coords,
+      );
       setSessionId(sid);
       setState("recording");
 
@@ -95,7 +104,9 @@ export default function RecordingScreen() {
 
         // Only stop a stale recording if one was in progress
         if (isRecording.current) {
-          try { cameraRef.current.stopRecording(); } catch {}
+          try {
+            cameraRef.current.stopRecording();
+          } catch {}
           await new Promise((r) => setTimeout(r, 500));
         }
 
@@ -116,7 +127,9 @@ export default function RecordingScreen() {
       } catch (e: any) {
         console.error("Chunk error:", e);
         if (isRecording.current) {
-          try { cameraRef.current?.stopRecording(); } catch {}
+          try {
+            cameraRef.current?.stopRecording();
+          } catch {}
           isRecording.current = false;
         }
         if (stopRequested.current) break;
@@ -228,9 +241,7 @@ export default function RecordingScreen() {
           </>
         )}
 
-        {error && state !== "done" && (
-          <Text style={styles.error}>{error}</Text>
-        )}
+        {error && state !== "done" && <Text style={styles.error}>{error}</Text>}
       </View>
     </SafeAreaView>
   );
@@ -318,3 +329,10 @@ const styles = StyleSheet.create({
   resultValue: { color: "#ffffff", fontSize: 14, fontFamily: "monospace" },
   error: { color: "#e94560", fontSize: 14, marginTop: 12, textAlign: "center" },
 });
+const PORT: number = Number(process.env.PORT) || 3000;
+
+// app.listen(PORT, "0.0.0.0", () => {
+//   console.log(`ChainGuard backend running on port: ${PORT}`);
+//   // Replace <YOUR_IPV4_ADDRESS> with the IP from ipconfig (e.g., 192.168.1.15)
+//   console.log(`Mobile app should connect to: http://YOUR_IP_HERE:${PORT}`);
+// });

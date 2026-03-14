@@ -52,9 +52,61 @@ export async function initContract(): Promise<void> {
   try {
     // Test connection by getting the block number
     const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-    await provider.getBlockNumber();
+    const blockNumber = await provider.getBlockNumber();
+    console.log(`✓ Connected to blockchain at block ${blockNumber}`);
+    console.log(`✓ Contract address: ${process.env.CONTRACT_ADDRESS}`);
   } catch (error) {
     throw new Error(`Failed to connect to blockchain: ${error}`);
+  }
+}
+
+export async function checkBlockchainConnection(): Promise<{
+  connected: boolean;
+  mode: string;
+  rpcUrl?: string;
+  contractAddress?: string;
+  blockNumber?: number;
+  error?: string;
+}> {
+  if (MOCK_MODE) {
+    return {
+      connected: true,
+      mode: "mock",
+      error: "CONTRACT_ADDRESS or BACKEND_PRIVATE_KEY not set",
+    };
+  }
+
+  try {
+    const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+    const blockNumber = await provider.getBlockNumber();
+
+    // Try to get contract code to verify contract exists
+    const code = await provider.getCode(process.env.CONTRACT_ADDRESS!);
+    if (code === "0x") {
+      return {
+        connected: false,
+        mode: "production",
+        rpcUrl: process.env.RPC_URL,
+        contractAddress: process.env.CONTRACT_ADDRESS,
+        error: "Contract not deployed at the specified address",
+      };
+    }
+
+    return {
+      connected: true,
+      mode: "production",
+      rpcUrl: process.env.RPC_URL,
+      contractAddress: process.env.CONTRACT_ADDRESS,
+      blockNumber,
+    };
+  } catch (error) {
+    return {
+      connected: false,
+      mode: "production",
+      rpcUrl: process.env.RPC_URL,
+      contractAddress: process.env.CONTRACT_ADDRESS,
+      error: String(error),
+    };
   }
 }
 
@@ -91,7 +143,13 @@ export async function submitEvidence(
     throw new Error(`Invalid wallet address: ${user}`);
   }
 
-  const tx = await contract!.storeEvidence(videoHash, isPublic, userAddress);
+  const tx = await contract!.storeEvidence(
+    videoHash,
+    isPublic,
+    userAddress,
+    latitude,
+    longitude,
+  );
   const receipt = await tx.wait();
   return receipt.hash;
 }
