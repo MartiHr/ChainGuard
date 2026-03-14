@@ -12,12 +12,12 @@ export async function uploadToIPFS(
   const file = new File([new Uint8Array(fileBuffer)], fileName, {
     type: fileName.endsWith(".mp4") ? "video/mp4" : "application/octet-stream",
   });
-  const result = await pinata.upload.file(file);
+  const result = await pinata.upload.public.file(file);
   return result.cid;
 }
 
 export async function downloadFromIPFS(cid: string): Promise<Buffer> {
-  const response = await pinata.gateways.get(cid);
+  const response = await pinata.gateways.public.get(cid);
   const blob = response.data as Blob;
   const arrayBuffer = await blob.arrayBuffer();
   return Buffer.from(arrayBuffer);
