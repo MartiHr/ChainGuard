@@ -63,13 +63,14 @@ export default function RecordingScreen() {
       }
 
       const publicKey = await SecureStore.getItemAsync("publicKey");
-      if (!publicKey) {
+      const walletAddress = await SecureStore.getItemAsync("walletAddress");
+      if (!publicKey || !walletAddress) {
         setError("No identity found. Please complete onboarding.");
         return;
       }
 
       const coords = await getGps();
-      const sid = await startSession(publicKey, publicKey, isPublic, coords);
+      const sid = await startSession(walletAddress, publicKey, isPublic, coords);
       setSessionId(sid);
       setState("recording");
 
