@@ -11,16 +11,26 @@ const signerAddress = await signer.getAddress();
 
 const artifact = JSON.parse(
   fs.readFileSync(
-    path.join(__dirname, "../artifacts/contracts/ChainGuard.sol/ChainGuard.json"),
+    path.join(
+      __dirname,
+      "../artifacts/contracts/ChainGuard.sol/ChainGuard.json",
+    ),
     "utf-8",
   ),
 );
 
 const deployment = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "../deployments/localhost.json"), "utf-8"),
+  fs.readFileSync(
+    path.join(__dirname, "../deployments/localhost.json"),
+    "utf-8",
+  ),
 );
 
-const contract = new ethers.Contract(deployment.ChainGuard, artifact.abi, signer);
+const contract = new ethers.Contract(
+  deployment.ChainGuard,
+  artifact.abi,
+  signer,
+);
 
 // ── Test records to seed ────────────────────────────────────
 const records = [
@@ -31,7 +41,7 @@ const records = [
     longitude: "23.3219",
   },
   {
-    cid: "bafybeidiop2nneprrfv55trwka7y2wljlbqtyg53h4hoytoetggxz7uidi",
+    cid: "bafybeicq64apw4kraynklvjrfdrxhj4e5qg7gsis4o7lq3ndsaybcaekaa",
     isPublic: true,
     latitude: "42.1354",
     longitude: "24.7453",
@@ -105,9 +115,12 @@ const records = [
 ];
 
 // Default: your recovery-key wallet. Override via CLI: node scripts/seed.js 0xOther
-const targetUser = process.argv[2] || "0x369C2B5961C89F56B1F2b798595BaBcd1c3A4c94";
+const targetUser =
+  process.argv[2] || "0x369C2B5961C89F56B1F2b798595BaBcd1c3A4c94";
 
-console.log(`Seeding ${records.length} evidence records for ${targetUser}...\n`);
+console.log(
+  `Seeding ${records.length} evidence records for ${targetUser}...\n`,
+);
 
 for (const r of records) {
   try {

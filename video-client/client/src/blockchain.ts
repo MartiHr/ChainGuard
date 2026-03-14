@@ -1,9 +1,9 @@
-import { ethers } from "ethers";
-import type { WalletState, EvidenceRecord } from "./types.ts";
-import { CONTRACT_ABI, CONTRACT_ADDRESS, RPC_URL } from "./config.ts";
+import { ethers } from 'ethers';
+import type { WalletState, EvidenceRecord } from './types.ts';
+import { CONTRACT_ABI, CONTRACT_ADDRESS, RPC_URL } from './config.ts';
 
 export function walletFromMnemonic(mnemonic: string): WalletState {
-  const trimmed = mnemonic.trim().toLowerCase().replace(/\s+/g, " ");
+  const trimmed = mnemonic.trim().toLowerCase().replace(/\s+/g, ' ');
   const wallet = ethers.HDNodeWallet.fromPhrase(trimmed);
   return {
     address: wallet.address,
@@ -20,7 +20,7 @@ function mapRawRecords(
     isPublic: boolean;
     latitude: string;
     longitude: string;
-  }>,
+  }>
 ): EvidenceRecord[] {
   return raw.map((r, index) => ({
     id: index,
@@ -28,19 +28,19 @@ function mapRawRecords(
     timestamp: Number(r.timestamp),
     latitude: r.latitude,
     longitude: r.longitude,
-    txHash: "",
+    txHash: '',
     owner: r.owner,
   }));
 }
 
 export async function fetchRecords(
-  walletAddress: string,
+  walletAddress: string
 ): Promise<EvidenceRecord[]> {
   const provider = new ethers.JsonRpcProvider(RPC_URL);
   const contract = new ethers.Contract(
     CONTRACT_ADDRESS,
     CONTRACT_ABI,
-    provider,
+    provider
   );
 
   // Fetch only the records that belong to this wallet address

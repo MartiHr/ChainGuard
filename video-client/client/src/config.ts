@@ -64,9 +64,7 @@ export const CONTRACT_ABI = [
 ] as const;
 
 // Configuration - update with your contract deployment details
-export const CONTRACT_ADDRESS = '0x0000000000000000000000000000000000000000';
+export const CONTRACT_ADDRESS = '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9';
 export const RPC_URL = 'http://127.0.0.1:8545';
-export const CONTRACT_ADDRESS = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
-export const RPC_URL = "http://127.0.0.1:8545";
-export const IPFS_GATEWAY = "https://gateway.pinata.cloud/ipfs";
-export const EXPLORER_URL = "http://localhost:8545";
+export const IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs';
+export const EXPLORER_URL = 'http://localhost:8545';

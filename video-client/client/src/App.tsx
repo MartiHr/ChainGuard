@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import type { WalletState } from "./types.ts";
-import SeedPhraseLogin from "./components/SeedPhraseLogin.tsx";
-import EvidenceBoard from "./components/EvidenceBoard.tsx";
+import { useState, useEffect } from 'react';
+import type { WalletState } from './types.ts';
+import SeedPhraseLogin from './components/SeedPhraseLogin.tsx';
+import EvidenceBoard from './components/evidence-board/index.tsx';
 
 export default function App() {
   const [wallet, setWallet] = useState<WalletState | null>(null);
@@ -9,8 +9,8 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.setAttribute(
-      "data-theme",
-      dark ? "dark" : "light",
+      'data-theme',
+      dark ? 'dark' : 'light'
     );
   }, [dark]);
 
@@ -22,7 +22,11 @@ export default function App() {
 
   if (!wallet) {
     return (
-      <SeedPhraseLogin onLogin={setWallet} dark={dark} onToggleTheme={toggleTheme} />
+      <SeedPhraseLogin
+        onLogin={setWallet}
+        dark={dark}
+        onToggleTheme={toggleTheme}
+      />
     );
   }
 
