@@ -36,8 +36,9 @@ body {
 
 .login-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;  /* Stacks children vertically */
+  align-items: center;     /* Centers children horizontally */
+  justify-content: center; /* Centers children vertically within the 100vh */
   min-height: 100vh;
   padding: 2rem;
   background:
@@ -108,6 +109,89 @@ body {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* ── Word-by-word input ── */
+.word-input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+
+.word-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.word-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Floating bubble trail below card ── */
+.bubble-trail {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+  max-width: 580px;
+  width: 100%;
+}
+
+.word-bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  font-size: 1rem;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 999px;
+  color: var(--text);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  animation: bubbleFloat 0.4s ease-out both;
+  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.word-bubble:hover {
+  transform: translateY(-3px) scale(1.05);
+  background: rgba(56, 189, 248, 0.15);
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.2);
+}
+
+.bubble-index {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-glow);
+  min-width: 1.2rem;
+  text-align: center;
+  border-radius: 999px;
+  padding: 0.1rem 0.3rem;
+}
+
+@keyframes bubbleFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.7);
+  }
+  60% {
+    transform: translateY(-4px) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .error-message {
