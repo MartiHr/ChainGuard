@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import type { WalletState, EvidenceRecord } from "../types.ts";
 import { fetchRecords } from "../blockchain.ts";
 import EvidenceCard from "./EvidenceCard.tsx";
+import ThemeToggle from "./ThemeToggle.tsx";
 
 interface Props {
   wallet: WalletState;
   onLogout: () => void;
+  dark: boolean;
+  onToggleTheme: () => void;
 }
 
 // Demonstration records used when the contract is not yet deployed
@@ -42,7 +45,7 @@ const DEMO_RECORDS: EvidenceRecord[] = [
   },
 ];
 
-export default function EvidenceBoard({ wallet, onLogout }: Props) {
+export default function EvidenceBoard({ wallet, onLogout, dark, onToggleTheme }: Props) {
   const [records, setRecords] = useState<EvidenceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -96,6 +99,7 @@ export default function EvidenceBoard({ wallet, onLogout }: Props) {
           <button className="btn-logout" onClick={onLogout}>
             Lock &amp; Logout
           </button>
+          <ThemeToggle dark={dark} onToggle={onToggleTheme} />
         </div>
       </header>
 

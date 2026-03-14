@@ -22,6 +22,21 @@
   --font: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
+/* ── Vibrant Light Theme ── */
+[data-theme="light"] {
+  --bg: #f0f4ff;
+  --surface: #ffffff;
+  --surface-hover: #f5f0ff;
+  --border: #e0d4f5;
+  --text: #1e1b4b;
+  --text-muted: #6b6394;
+  --accent: #7c3aed;
+  --accent-glow: rgba(124, 58, 237, 0.12);
+  --green: #16a34a;
+  --yellow: #ca8a04;
+  --red: #dc2626;
+}
+
 html {
   font-size: 16px;
 }
@@ -36,14 +51,22 @@ body {
 
 .login-container {
   display: flex;
-  flex-direction: column;  /* Stacks children vertically */
-  align-items: center;     /* Centers children horizontally */
-  justify-content: center; /* Centers children vertically within the 100vh */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   min-height: 100vh;
   padding: 2rem;
+  position: relative;
   background:
-    radial-gradient(ellipse at top, rgba(56, 189, 248, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at top, var(--accent-glow) 0%, transparent 60%),
     var(--bg);
+}
+
+/* Theme toggle pinned top-right on login page */
+.login-theme-toggle {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
 }
 
 .login-card {
@@ -54,6 +77,13 @@ body {
   max-width: 480px;
   width: 100%;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+[data-theme="light"] .login-card {
+  box-shadow:
+    0 24px 80px rgba(124, 58, 237, 0.08),
+    0 0 0 1px rgba(124, 58, 237, 0.06);
 }
 
 .login-header {
@@ -153,8 +183,8 @@ body {
   padding: 0.55rem 1rem;
   font-size: 1rem;
   font-family: "JetBrains Mono", "Fira Code", monospace;
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: var(--accent-glow);
+  border: 1px solid var(--accent);
   border-radius: 999px;
   color: var(--text);
   cursor: pointer;
@@ -165,8 +195,8 @@ body {
 
 .word-bubble:hover {
   transform: translateY(-3px) scale(1.05);
-  background: rgba(56, 189, 248, 0.15);
-  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.2);
+  background: var(--accent-glow);
+  box-shadow: 0 6px 20px var(--accent-glow);
 }
 
 .bubble-index {
@@ -212,12 +242,12 @@ body {
   padding: 0.85rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: #000;
+  color: #fff;
   background: var(--accent);
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+  transition: opacity 0.2s, transform 0.1s, background 0.3s;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -343,8 +373,8 @@ body {
 }
 
 .notice-info {
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: var(--accent-glow);
+  border: 1px solid var(--accent);
   color: var(--accent);
 }
 
@@ -368,7 +398,7 @@ body {
 }
 
 .evidence-card:hover {
-  border-color: rgba(56, 189, 248, 0.3);
+  border-color: var(--accent);
   box-shadow: 0 0 20px var(--accent-glow);
 }
 
@@ -446,12 +476,12 @@ body {
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
   font-weight: 600;
-  background: linear-gradient(135deg, var(--accent), #0ea5e9);
-  color: #000;
+  background: var(--accent);
+  color: #fff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+  transition: opacity 0.2s, transform 0.1s, background 0.3s;
 }
 
 .btn-download:hover:not(:disabled) {
@@ -527,4 +557,107 @@ body {
   .login-card {
     padding: 2rem 1.5rem;
   }
+}
+
+/* ───────────────────── Theme Toggle Switch ───────────────────── */
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-track {
+  position: relative;
+  width: 56px;
+  height: 28px;
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5px;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.toggle-icon {
+  font-size: 0.75rem;
+  z-index: 1;
+  line-height: 1;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: var(--accent);
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode = thumb on right (moon side) */
+[data-theme="dark"] .toggle-thumb,
+:root:not([data-theme]) .toggle-thumb {
+  transform: translateX(28px);
+}
+
+/* Light mode = thumb on left (sun side) */
+[data-theme="light"] .toggle-thumb {
+  transform: translateX(0);
+  background: var(--accent);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+}
+
+[data-theme="light"] .toggle-track {
+  background: linear-gradient(135deg, #e0d4f5, #f0e6ff);
+  border-color: #c4b5fd;
+}
+
+/* ───────────────────── Light Theme Extras ───────────────────── */
+[data-theme="light"] body {
+  background: var(--bg);
+}
+
+[data-theme="light"] .login-container {
+  background:
+    radial-gradient(ellipse at top left, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(236, 72, 153, 0.06) 0%, transparent 50%),
+    var(--bg);
+}
+
+[data-theme="light"] .dashboard-header {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom-color: var(--border);
+}
+
+[data-theme="light"] .stats-bar {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+[data-theme="light"] .evidence-card {
+  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.06);
+}
+
+[data-theme="light"] .evidence-card:hover {
+  box-shadow:
+    0 8px 30px rgba(124, 58, 237, 0.12),
+    0 0 0 1px rgba(124, 58, 237, 0.15);
+}
+
+[data-theme="light"] .integrity-badge.ok {
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.3);
+}
+
+[data-theme="light"] .integrity-badge.fail {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
 }

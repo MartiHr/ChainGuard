@@ -1,12 +1,15 @@
 import { useState, useRef } from "react";
 import type { WalletState } from "../types.ts";
 import { walletFromMnemonic } from "../blockchain.ts";
+import ThemeToggle from "./ThemeToggle.tsx";
 
 interface Props {
   onLogin: (wallet: WalletState) => void;
+  dark: boolean;
+  onToggleTheme: () => void;
 }
 
-export default function SeedPhraseLogin({ onLogin }: Props) {
+export default function SeedPhraseLogin({ onLogin, dark, onToggleTheme }: Props) {
   const [words, setWords] = useState<string[]>([]);
   const [currentWord, setCurrentWord] = useState("");
   const [error, setError] = useState("");
@@ -79,6 +82,9 @@ export default function SeedPhraseLogin({ onLogin }: Props) {
 
   return (
     <div className="login-container">
+      <div className="login-theme-toggle">
+        <ThemeToggle dark={dark} onToggle={onToggleTheme} />
+      </div>
       <div className="login-card">
         <div className="login-header">
           <div className="shield-icon">🛡️</div>
