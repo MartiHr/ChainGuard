@@ -7,7 +7,7 @@ const pinata = new PinataSDK({
 
 export async function uploadToIPFS(
   fileBuffer: Buffer,
-  fileName: string
+  fileName: string,
 ): Promise<string> {
   const file = new File([new Uint8Array(fileBuffer)], fileName, {
     type: fileName.endsWith(".mp4") ? "video/mp4" : "application/octet-stream",

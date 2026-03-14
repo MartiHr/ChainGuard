@@ -1,15 +1,13 @@
 import * as bip39 from "bip39";
 import nacl from "tweetnacl";
 import * as naclUtil from "tweetnacl-util";
-import { ethers } from "ethers";
+import * as ethers from "ethers";
 
 export function generateSeedPhrase(): string {
   return bip39.generateMnemonic(128);
 }
 
-export async function deriveKeys(
-  seedPhrase: string,
-): Promise<{
+export async function deriveKeys(seedPhrase: string): Promise<{
   publicKey: Uint8Array;
   privateKey: Uint8Array;
   address: string;

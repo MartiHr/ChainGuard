@@ -51,6 +51,18 @@ export default function HomeScreen() {
             <Text style={styles.navButtonText}>Public Feed</Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          style={styles.resetButton}
+          onPress={async () => {
+            await SecureStore.deleteItemAsync("seedPhrase");
+            await SecureStore.deleteItemAsync("publicKey");
+            await SecureStore.deleteItemAsync("walletAddress");
+            router.replace("/onboarding");
+          }}
+        >
+          <Text style={styles.resetButtonText}>Reset App</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -107,4 +119,12 @@ const styles = StyleSheet.create({
     borderColor: "#0f3460",
   },
   navButtonText: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
+  resetButton: {
+    marginTop: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    backgroundColor: "#333333",
+  },
+  resetButtonText: { color: "#ffaaaa", fontSize: 14 },
 });

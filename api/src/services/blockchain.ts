@@ -33,7 +33,10 @@ const contract = getContract();
  * Parse GPS coordinates string into latitude and longitude
  * Expected format: "latitude,longitude" or empty string
  */
-function parseGpsCoordinates(gpsCoordinates: string): { latitude: string; longitude: string } {
+function parseGpsCoordinates(gpsCoordinates: string): {
+  latitude: string;
+  longitude: string;
+} {
   if (!gpsCoordinates || !gpsCoordinates.includes(",")) {
     return { latitude: "0", longitude: "0" };
   }
@@ -48,7 +51,7 @@ export async function initContract(): Promise<void> {
   }
   try {
     // Test connection by getting the block number
-    const provider = contract!.provider as ethers.Provider;
+    const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
     await provider.getBlockNumber();
   } catch (error) {
     throw new Error(`Failed to connect to blockchain: ${error}`);
@@ -80,7 +83,15 @@ export async function submitEvidence(
     console.log("  [MOCK] Blockchain submission skipped. Mock tx:", mockTxHash);
     return mockTxHash;
   }
-  const tx = await contract!.storeEvidence(videoHash, isPublic, user, latitude, longitude);
+  // Ensure the user argument is a valid Ethereum address (avoid ENS resolution on local chains)
+  let userAddress: string;
+  try {
+    userAddress = ethers.getAddress(user);
+  } catch (err) {
+    throw new Error(`Invalid wallet address: ${user}`);
+  }
+
+  const tx = await contract!.storeEvidence(videoHash, isPublic, userAddress);
   const receipt = await tx.wait();
   return receipt.hash;
 }
@@ -98,7 +109,7 @@ function normalizeEvidenceData(evidence: any): any {
         return value.toString();
       }
       return value;
-    })
+    }),
   );
 }
 

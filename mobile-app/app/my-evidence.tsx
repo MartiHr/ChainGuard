@@ -60,8 +60,8 @@ function EvidenceCard({
           </Text>
         </View>
       </View>
-      <Text style={styles.detail}>GPS: {item.gpsCoordinates}</Text>
-      <Text style={styles.detail}>CID: {item.videoHash.slice(0, 16)}...</Text>
+      <Text style={styles.detail}>Owner: {item.owner.slice(0, 10)}...</Text>
+      <Text style={styles.detail}>CID: {item.cid.slice(0, 16)}...</Text>
     </TouchableOpacity>
   );
 }
@@ -94,7 +94,7 @@ export default function MyEvidenceScreen() {
 
   const handlePress = async (item: EvidenceItem) => {
     if (item.isPublic) {
-      Linking.openURL(`https://${PINATA_GATEWAY}/ipfs/${item.videoHash}`);
+      Linking.openURL(`https://${PINATA_GATEWAY}/ipfs/${item.cid}`);
       return;
     }
 
@@ -104,7 +104,7 @@ export default function MyEvidenceScreen() {
       // 1. Download encrypted file from IPFS
       const downloadPath = FileSystem.cacheDirectory + "encrypted_evidence";
       const download = await FileSystem.downloadAsync(
-        `https://${PINATA_GATEWAY}/ipfs/${item.videoHash}`,
+        `https://${PINATA_GATEWAY}/ipfs/${item.cid}`,
         downloadPath,
       );
 
@@ -166,7 +166,7 @@ export default function MyEvidenceScreen() {
 
       <FlatList
         data={evidence}
-        keyExtractor={(item, i) => `${item.videoHash}-${i}`}
+        keyExtractor={(item, i) => `${item.cid}-${i}`}
         renderItem={({ item }) => (
           <EvidenceCard
             item={item}
