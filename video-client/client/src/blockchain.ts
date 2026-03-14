@@ -12,6 +12,27 @@ export function walletFromMnemonic(mnemonic: string): WalletState {
   };
 }
 
+function mapRawRecords(
+  raw: Array<{
+    cid: string;
+    timestamp: bigint;
+    owner: string;
+    isPublic: boolean;
+    latitude: string;
+    longitude: string;
+  }>,
+): EvidenceRecord[] {
+  return raw.map((r, index) => ({
+    id: index,
+    cid: r.cid,
+    timestamp: Number(r.timestamp),
+    latitude: r.latitude,
+    longitude: r.longitude,
+    txHash: "",
+    owner: r.owner,
+  }));
+}
+
 export async function fetchRecords(
   walletAddress: string,
 ): Promise<EvidenceRecord[]> {
@@ -22,22 +43,7 @@ export async function fetchRecords(
     provider,
   );
 
-  const raw: Array<{
-    cid: string;
-    timestamp: bigint;
-    owner: string;
-    isPublic: boolean;
-    latitude: string;
-    longitude: string;
-  }> = await contract.getEvidencesByUser(walletAddress);
-
-  return raw.map((r, index) => ({
-    id: index,
-    cid: r.cid,
-    timestamp: Number(r.timestamp),
-    latitude: r.latitude,
-    longitude: r.longitude,
-    txHash: "", // not available from contract query
-    owner: r.owner,
-  }));
+  // Fetch only the records that belong to this wallet address
+  const raw = await contract.getEvidencesByUser(walletAddress);
+  return mapRawRecords(raw);
 }
