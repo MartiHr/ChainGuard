@@ -36,22 +36,6 @@ export default function HomeScreen() {
           <Text style={styles.broadcastButtonText}>Public Broadcast</Text>
         </TouchableOpacity>
 
-        <View style={styles.row}>
-          <TouchableOpacity
-            style={styles.navButton}
-            onPress={() => router.push("/my-evidence")}
-          >
-            <Text style={styles.navButtonText}>My Evidence</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navButton}
-            onPress={() => router.push("/public-feed")}
-          >
-            <Text style={styles.navButtonText}>Public Feed</Text>
-          </TouchableOpacity>
-        </View>
-
         <TouchableOpacity
           style={styles.resetButton}
           onPress={async () => {
@@ -108,17 +92,6 @@ const styles = StyleSheet.create({
     borderColor: "#e94560",
   },
   broadcastButtonText: { color: "#e94560", fontSize: 18, fontWeight: "bold" },
-  row: { flexDirection: "row", gap: 16, width: "100%" },
-  navButton: {
-    flex: 1,
-    backgroundColor: "#16213e",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#0f3460",
-  },
-  navButtonText: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
   resetButton: {
     marginTop: 24,
     paddingVertical: 12,
