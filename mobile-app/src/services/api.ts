@@ -2,13 +2,23 @@
 // For physical devices, use your machine's IP address
 const API_BASE = process.env.EXPO_PUBLIC_API_BASE || "http://10.0.2.2:3000";
 
+async function fetchApi(path: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(`${API_BASE}${path}`, init);
+  } catch (error: any) {
+    throw new Error(
+      `Network request failed (${API_BASE}${path}). Ensure backend is running and restart Expo after .env changes.`,
+    );
+  }
+}
+
 export async function startSession(
   walletAddress: string,
   publicKey: string,
   isPublic: boolean,
   gpsCoordinates: string,
 ): Promise<string> {
-  const res = await fetch(`${API_BASE}/sessions`, {
+  const res = await fetchApi(`/sessions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -40,7 +50,7 @@ export async function uploadChunk(
     formData.append("gpsCoordinates", gpsCoordinates);
   }
 
-  const res = await fetch(`${API_BASE}/sessions/${sessionId}/chunks`, {
+  const res = await fetchApi(`/sessions/${sessionId}/chunks`, {
     method: "POST",
     body: formData,
   });
@@ -50,7 +60,7 @@ export async function uploadChunk(
 export async function endSession(
   sessionId: string,
 ): Promise<{ cid: string; transactionHash: string }> {
-  const res = await fetch(`${API_BASE}/sessions/${sessionId}/end`, {
+  const res = await fetchApi(`/sessions/${sessionId}/end`, {
     method: "POST",
   });
   if (!res.ok) throw new Error(`endSession failed: ${res.status}`);
@@ -58,13 +68,13 @@ export async function endSession(
 }
 
 export async function getEvidenceByUser(walletAddress: string): Promise<any[]> {
-  const res = await fetch(`${API_BASE}/evidence/${walletAddress}`);
+  const res = await fetchApi(`/evidence/${walletAddress}`);
   if (!res.ok) throw new Error(`getEvidenceByUser failed: ${res.status}`);
   return res.json();
 }
 
 export async function getPublicEvidence(): Promise<any[]> {
-  const res = await fetch(`${API_BASE}/evidence/public`);
+  const res = await fetchApi(`/evidence/public`);
   if (!res.ok) throw new Error(`getPublicEvidence failed: ${res.status}`);
   return res.json();
 }
