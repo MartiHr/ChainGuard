@@ -11,6 +11,7 @@ export const DEMO_RECORDS: EvidenceRecord[] = [
     txHash:
       '0xabc123def456789012345678901234567890abcdef1234567890abcdef123456',
     owner: '0x0000000000000000000000000000000000000000',
+    isPublic: true,
   },
   {
     id: 2,
@@ -21,6 +22,7 @@ export const DEMO_RECORDS: EvidenceRecord[] = [
     txHash:
       '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
     owner: '0x0000000000000000000000000000000000000000',
+    isPublic: true,
   },
   {
     id: 3,
@@ -31,6 +33,7 @@ export const DEMO_RECORDS: EvidenceRecord[] = [
     txHash:
       '0x789012345678901234567890abcdef1234567890abcdef1234567890abcdef12',
     owner: '0x0000000000000000000000000000000000000000',
+    isPublic: true,
   },
   {
     id: 4,
@@ -41,5 +44,6 @@ export const DEMO_RECORDS: EvidenceRecord[] = [
     txHash:
       '0x789012345678901234567890abcdef1234567890abcdef1234567890abcdef12',
     owner: '0x0000000000000000000000000000000000000000',
+    isPublic: true,
   },
 ];

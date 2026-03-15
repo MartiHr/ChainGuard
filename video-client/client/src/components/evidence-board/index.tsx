@@ -1,9 +1,32 @@
+import { Component, type ReactNode } from 'react';
 import EvidenceCard from '../evidence-card/index.tsx';
+import { PublicFeedMap } from '../public-feed-map/index.tsx';
 import { Header } from './header/index.tsx';
 import type { EvidenceBoardProps } from './models.ts';
 import { StatsBar } from './start-bar/index.tsx';
 import { useBlockchainData } from './use-blockchain-data.tsx';
 import { usePublicBlockchainData } from './use-public-blockchain-data.tsx';
+
+// Prevents a map initialisation error from unmounting the whole app
+class MapErrorBoundary extends Component<
+  { children: ReactNode },
+  { error: string | null }
+> {
+  state = { error: null };
+  static getDerivedStateFromError(e: Error) {
+    return { error: e.message };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="notice notice-warn" style={{ margin: '0 2rem 1rem' }}>
+          🗺️ Map could not be loaded: {this.state.error}
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export default function EvidenceBoard({
   wallet,
@@ -79,11 +102,24 @@ export default function EvidenceBoard({
             <p>No public videos available yet.</p>
           </div>
         ) : (
-          <div className="evidence-grid">
-            {publicRecords.map((r) => (
-              <EvidenceCard key={`public-${r.id}`} record={r} isPublicFeed />
-            ))}
-          </div>
+          <>
+            <div className="section-map-label">
+              <span>🗺️ Geolocation Map</span>
+              <span className="section-map-hint">Click a pin to view details and download</span>
+            </div>
+            <MapErrorBoundary>
+              <PublicFeedMap records={publicRecords} />
+            </MapErrorBoundary>
+
+            <div className="section-subheader">
+              <span>📋 All Records</span>
+            </div>
+            <div className="evidence-grid">
+              {publicRecords.map((r) => (
+                <EvidenceCard key={`public-${r.id}`} record={r} isPublicFeed />
+              ))}
+            </div>
+          </>
         )}
       </section>
     </div>

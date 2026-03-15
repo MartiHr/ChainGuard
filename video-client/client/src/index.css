@@ -692,3 +692,142 @@ body {
   background: rgba(220, 38, 38, 0.1);
   border-color: rgba(220, 38, 38, 0.3);
 }
+
+/* ───────────────────── Public Feed Map ───────────────────── */
+.section-map-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 2rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.section-map-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.section-subheader {
+  padding: 0.75rem 2rem 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.feed-map-wrapper {
+  margin: 0 2rem 0.5rem;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.feed-map {
+  height: 420px;
+  width: 100%;
+}
+
+/* Popup */
+.map-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 210px;
+  font-family: var(--font);
+}
+
+.map-popup-id {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #4a6fa5;
+  text-align: right;
+  font-family: monospace;
+}
+
+.map-popup-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: #1a1a2e;
+  line-height: 1.4;
+}
+
+.map-popup-label {
+  flex-shrink: 0;
+}
+
+.map-popup-cid {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.75rem;
+  color: #4a6fa5;
+  word-break: break-all;
+}
+
+.map-integrity {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.map-integrity.ok {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.map-integrity.fail {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-map-download {
+  margin-top: 4px;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-map-download:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.btn-map-download.downloading {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #38bdf8;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.btn-map-download:disabled {
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .feed-map-wrapper {
+    margin: 0 1rem 0.5rem;
+  }
+
+  .feed-map {
+    height: 280px;
+  }
+
+  .section-map-label,
+  .section-subheader {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
