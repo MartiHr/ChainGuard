@@ -112,7 +112,7 @@ export default function RecordingScreen() {
 
         isRecording.current = true;
         const video = await cameraRef.current.recordAsync({
-          maxDuration: 10,
+          maxDuration: 5,
         });
         isRecording.current = false;
 
