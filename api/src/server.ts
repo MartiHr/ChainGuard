@@ -21,6 +21,6 @@ initContract()
   .then(() => console.log("Connected to blockchain"))
   .catch(console.error);
 
-app.listen(PORT, () => {
-  console.log(`ChainGuard backend running on ${PORT}`);
+app.listen(Number(PORT), "0.0.0.0", () => {
+  console.log(`ChainGuard backend running on 0.0.0.0:${PORT}`);
 });

@@ -14,6 +14,9 @@ import { startSession, uploadChunk, endSession } from "../src/services/api";
 
 type RecordingState = "initializing" | "recording" | "stopping" | "done";
 
+const CHUNK_MAX_DURATION_SEC = 12;
+const MIN_FINAL_CHUNK_MS = 3000;
+
 export default function RecordingScreen() {
   const router = useRouter();
   const { mode } = useLocalSearchParams<{ mode: string }>();
@@ -23,7 +26,6 @@ export default function RecordingScreen() {
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [micPermission, requestMicPermission] = useMicrophonePermissions();
   const [state, setState] = useState<RecordingState>("initializing");
-  const [sessionId, setSessionId] = useState<string | null>(null);
   const [chunkCount, setChunkCount] = useState(0);
   const [gps, setGps] = useState("Acquiring...");
   const [result, setResult] = useState<{
@@ -33,6 +35,8 @@ export default function RecordingScreen() {
   const [error, setError] = useState("");
   const stopRequested = useRef(false);
   const isRecording = useRef(false);
+  const chunkStartedAt = useRef<number | null>(null);
+  const stopInProgress = useRef(false);
 
   useEffect(() => {
     initSession();
@@ -80,7 +84,6 @@ export default function RecordingScreen() {
         isPublic,
         coords,
       );
-      setSessionId(sid);
       setState("recording");
 
       // Start recording loop after a brief delay for camera to mount
@@ -92,6 +95,8 @@ export default function RecordingScreen() {
 
   async function recordLoop(sid: string) {
     let idx = 0;
+    let pendingUpload: Promise<void> | null = null;
+
     // Wait for camera to fully initialize
     await new Promise((r) => setTimeout(r, 1000));
 
@@ -102,28 +107,38 @@ export default function RecordingScreen() {
           continue;
         }
 
-        // Only stop a stale recording if one was in progress
-        if (isRecording.current) {
-          try {
-            cameraRef.current.stopRecording();
-          } catch {}
-          await new Promise((r) => setTimeout(r, 500));
-        }
-
+        // Start recording immediately — no waiting on uploads first
         isRecording.current = true;
+        chunkStartedAt.current = Date.now();
         const video = await cameraRef.current.recordAsync({
-          maxDuration: 5,
+          maxDuration: CHUNK_MAX_DURATION_SEC,
         });
         isRecording.current = false;
+        chunkStartedAt.current = null;
 
-        if (!video || stopRequested.current) break;
+        if (!video) break;
 
-        const coords = await getGps();
-        await uploadChunk(sid, video.uri, idx, coords);
-        await FileSystem.deleteAsync(video.uri, { idempotent: true });
+        // While we were recording, the previous upload was running in parallel.
+        // Make sure it finished before we start the next upload.
+        if (pendingUpload) {
+          await pendingUpload;
+          pendingUpload = null;
+        }
+
+        // Kick off this chunk's upload in the background so the next
+        // recording can start immediately on the next loop iteration.
+        const chunkIdx = idx;
+        const chunkUri = video.uri;
+        pendingUpload = (async () => {
+          const coords = await getGps();
+          await uploadChunk(sid, chunkUri, chunkIdx, coords);
+          await FileSystem.deleteAsync(chunkUri, { idempotent: true });
+        })();
 
         idx++;
         setChunkCount(idx);
+
+        if (stopRequested.current) break;
       } catch (e: any) {
         console.error("Chunk error:", e);
         if (isRecording.current) {
@@ -132,30 +147,53 @@ export default function RecordingScreen() {
           } catch {}
           isRecording.current = false;
         }
+        chunkStartedAt.current = null;
         if (stopRequested.current) break;
-        // Longer delay before retrying to let camera recover
         await new Promise((r) => setTimeout(r, 2000));
       }
     }
+
+    // Wait for the last in-flight upload before finalizing
+    if (pendingUpload) {
+      try {
+        await pendingUpload;
+      } catch (e) {
+        console.error("Final upload error:", e);
+      }
+    }
+
+    setState("stopping");
+    try {
+      const res = await endSession(sid);
+      setResult(res);
+    } catch (e: any) {
+      setError(`Failed to finalize: ${e.message}`);
+    }
+    setState("done");
   }
 
   async function handleStop() {
+    if (stopInProgress.current || state !== "recording") return;
+    stopInProgress.current = true;
+
     stopRequested.current = true;
     setState("stopping");
 
     if (isRecording.current && cameraRef.current) {
-      cameraRef.current.stopRecording();
-    }
-
-    if (sessionId) {
       try {
-        const res = await endSession(sessionId);
-        setResult(res);
-      } catch (e: any) {
-        setError(`Failed to finalize: ${e.message}`);
-      }
+        const startedAt = chunkStartedAt.current;
+        if (startedAt) {
+          const elapsedMs = Date.now() - startedAt;
+          const waitMs = Math.max(0, MIN_FINAL_CHUNK_MS - elapsedMs);
+          if (waitMs > 0) {
+            await new Promise((r) => setTimeout(r, waitMs));
+          }
+        }
+
+        cameraRef.current.stopRecording();
+      } catch {}
     }
-    setState("done");
+    // recordLoop finalizes after the current chunk upload completes.
   }
 
   if (!cameraPermission?.granted && state === "initializing") {
@@ -329,10 +367,3 @@ const styles = StyleSheet.create({
   resultValue: { color: "#ffffff", fontSize: 14, fontFamily: "monospace" },
   error: { color: "#e94560", fontSize: 14, marginTop: 12, textAlign: "center" },
 });
-const PORT: number = Number(process.env.PORT) || 3000;
-
-// app.listen(PORT, "0.0.0.0", () => {
-//   console.log(`ChainGuard backend running on port: ${PORT}`);
-//   // Replace <YOUR_IPV4_ADDRESS> with the IP from ipconfig (e.g., 192.168.1.15)
-//   console.log(`Mobile app should connect to: http://YOUR_IP_HERE:${PORT}`);
-// });
