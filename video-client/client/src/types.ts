@@ -6,6 +6,7 @@ export interface EvidenceRecord {
   longitude: string;
   txHash: string;
   owner: string;
+  isPublic: boolean;
 }
 
 export interface WalletState {

@@ -5,7 +5,11 @@ import { EXPLORER_URL } from '../../config.ts';
 import { STAGE_LABELS } from './constants.ts';
 import type { EvidenceCardProps } from './models.ts';
 
-export default function EvidenceCard({ record, mnemonic }: EvidenceCardProps) {
+export default function EvidenceCard({
+  record,
+  mnemonic,
+  isPublicFeed = false,
+}: EvidenceCardProps) {
   const [stage, setStage] = useState<DownloadStage>('idle');
   const [integrityOk, setIntegrityOk] = useState<boolean | null>(null);
 
@@ -22,27 +26,42 @@ export default function EvidenceCard({ record, mnemonic }: EvidenceCardProps) {
   const gpsDisplay = `${record.latitude}°N, ${record.longitude}°E`;
   const safeGps = `${record.latitude}N_${record.longitude}E`;
   const safeDate = date.toISOString().slice(0, 10);
+  const labelByStage: Record<DownloadStage, string> = {
+    ...STAGE_LABELS,
+    idle: isPublicFeed ? '⬇️ Download MP4' : STAGE_LABELS.idle,
+    decrypting: isPublicFeed
+      ? '📦 Preparing Download…'
+      : STAGE_LABELS.decrypting,
+  };
 
   const handleDownload = async () => {
     try {
-      // 1. Fetch encrypted blob
+      // 1. Fetch blob from IPFS by CID
       setStage('fetching');
-      const encryptedBytes = await fetchFromIPFS(record.cid);
+      const downloadedBytes = await fetchFromIPFS(record.cid);
 
       // 2. Integrity check — SHA-256 of the blob
       setStage('verifying');
-      const hash = await sha256Hex(encryptedBytes);
+      const hash = await sha256Hex(downloadedBytes);
       const integrityMatch = hash.length > 0; // real check against CID
       setIntegrityOk(integrityMatch);
 
-      // 3. Try to decrypt; if the file is unencrypted, use raw bytes
+      // 3. Private records are encrypted; public records are downloaded as-is
       let finalBytes: ArrayBuffer;
-      try {
-        setStage('decrypting');
-        finalBytes = await decryptVideo(encryptedBytes, mnemonic);
-      } catch {
-        // File is not encrypted — download as-is
-        finalBytes = encryptedBytes;
+      if (isPublicFeed) {
+        finalBytes = downloadedBytes;
+      } else {
+        if (!mnemonic) {
+          throw new Error('Seed phrase is required for private evidence decryption.');
+        }
+
+        try {
+          setStage('decrypting');
+          finalBytes = await decryptVideo(downloadedBytes, mnemonic);
+        } catch {
+          // Fallback for legacy unencrypted private records
+          finalBytes = downloadedBytes;
+        }
       }
 
       // 4. Build blob & trigger download
@@ -115,7 +134,7 @@ export default function EvidenceCard({ record, mnemonic }: EvidenceCardProps) {
         onClick={handleDownload}
         disabled={stage !== 'idle'}
       >
-        {STAGE_LABELS[stage]}
+        {labelByStage[stage]}
       </button>
     </div>
   );

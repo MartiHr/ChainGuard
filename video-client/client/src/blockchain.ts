@@ -14,6 +14,19 @@ export function walletFromMnemonic(mnemonic: string): WalletState {
   };
 }
 
+function toEvidenceRecord(r: any, index: number): EvidenceRecord {
+  return {
+    id: index,
+    cid: r.cid,
+    timestamp: Number(r.timestamp.toString()),
+    latitude: r.latitude,
+    longitude: r.longitude,
+    txHash: '',
+    owner: r.owner,
+    isPublic: Boolean(r.isPublic),
+  };
+}
+
 export async function fetchRecords(
   walletAddress: string
 ): Promise<EvidenceRecord[]> {
@@ -27,14 +40,17 @@ export async function fetchRecords(
   // Make sure this is a view function in Solidity
   const raw = await contract.getEvidencesByUser(walletAddress);
 
-  // Convert BigNumbers properly
-  return raw.map((r: any, index: number) => ({
-    id: index,
-    cid: r.cid,
-    timestamp: Number(r.timestamp.toString()), // if it's BigNumber
-    latitude: r.latitude,
-    longitude: r.longitude,
-    txHash: '', // Optional, can add if needed
-    owner: r.owner,
-  }));
+  return raw.map(toEvidenceRecord);
+}
+
+export async function fetchPublicRecords(): Promise<EvidenceRecord[]> {
+  const provider = new ethers.JsonRpcProvider(RPC_URL);
+  const contract = new ethers.Contract(
+    CONTRACT_ADDRESS,
+    ChainGuardABI,
+    provider
+  );
+
+  const raw = await contract.getPublicFeed();
+  return raw.map(toEvidenceRecord);
 }
